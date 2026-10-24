@@ -6,16 +6,37 @@
  */
 #include "v0.h"
 
+// Sobel kernels (x grows right, y grows down):
+//        [-1 0 1]          [-1 -2 -1]
+//   Ix = [-2 0 2]     Iy = [ 0  0  0]
+//        [-1 0 1]          [ 1  2  1]
+// Neighbors outside the image are clamped to the nearest edge pixel.
 void v0_sobel(const ImageF& in, ImageF& Ix, ImageF& Iy) {
-    // TODO(NDB, Day 7)
-    Ix.w = Iy.w = in.w;
-    Ix.h = Iy.h = in.h;
-    Ix.data.assign((size_t)in.w * in.h, 0.0f);
-    Iy.data.assign((size_t)in.w * in.h, 0.0f);
+    const int w = in.w, h = in.h;
+    Ix.w = Iy.w = w;
+    Ix.h = Iy.h = h;
+    Ix.data.resize((size_t)w * h);
+    Iy.data.resize((size_t)w * h);
+    const float* p = in.data.data();
+
+    for (int y = 0; y < h; y++) {
+        const float* up = p + (size_t)clampi(y - 1, 0, h - 1) * w;
+        const float* mid = p + (size_t)y * w;
+        const float* down = p + (size_t)clampi(y + 1, 0, h - 1) * w;
+        for (int x = 0; x < w; x++) {
+            int xl = clampi(x - 1, 0, w - 1);
+            int xr = clampi(x + 1, 0, w - 1);
+            float gx = (up[xr] + 2.0f * mid[xr] + down[xr]) - (up[xl] + 2.0f * mid[xl] + down[xl]);
+            float gy = (down[xl] + 2.0f * down[x] + down[xr]) - (up[xl] + 2.0f * up[x] + up[xr]);
+            Ix.data[(size_t)y * w + x] = gx;
+            Iy.data[(size_t)y * w + x] = gy;
+        }
+    }
 }
 
 void v0_detect(const ImageF& blurred, std::vector<Keypoint>& kps) {
-    (void)blurred;
+    ImageF Ix, Iy;
+    v0_sobel(blurred, Ix, Iy);
     // TODO(NDB, Day 8-9): Harris score, NMS 3x3, sort by score, keep top MAX_KEYPOINTS.
     kps.clear();
 }
