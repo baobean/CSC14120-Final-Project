@@ -3,6 +3,12 @@
  * Authors: NDB
  * External sources: none
  * AI assistance: drafted with Claude Code (Anthropic), reviewed by NDB.
+ *
+ * TODO summary (Stage 1):
+ *   Week 1 Day 7   NDB  Sobel Ix, Iy                                   (done)
+ *   Week 2 Day 8   NDB  Harris score R for each pixel
+ *   Week 2 Day 9   NDB  NMS 3x3, sort by score, keep top K; keypoint debug image (debug_draw.cpp)
+ *   Week 2 Day 10  NDB  check keypoint count and spread on all sites
  */
 #include "v0.h"
 
@@ -37,6 +43,16 @@ void v0_sobel(const ImageF& in, ImageF& Ix, ImageF& Iy) {
 void v0_detect(const ImageF& blurred, std::vector<Keypoint>& kps) {
     ImageF Ix, Iy;
     v0_sobel(blurred, Ix, Iy);
-    // TODO(NDB, Day 8-9): Harris score, NMS 3x3, sort by score, keep top MAX_KEYPOINTS.
     kps.clear();
+
+    // TODO(NDB, Week 2 Day 8): Harris score.
+    //   For each pixel, sum over a HARRIS_WIN x HARRIS_WIN window (clamped border):
+    //     Sxx = sum Ix*Ix, Syy = sum Iy*Iy, Sxy = sum Ix*Iy
+    //   R = (Sxx*Syy - Sxy*Sxy) - HARRIS_K * (Sxx + Syy)^2, stored in an ImageF.
+
+    // TODO(NDB, Week 2 Day 9): NMS 3x3 + top K.
+    //   Keep pixel (x, y) only if R > 0 and R is strictly greater than its 8 neighbors
+    //   (clamped border). Sort by score, highest first; on equal score sort by y then x,
+    //   so V1+ (atomics give a random order) can sort back to the same list.
+    //   Keep the first MAX_KEYPOINTS.
 }

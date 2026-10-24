@@ -5,6 +5,13 @@
  * AI assistance: drafted with Claude Code (Anthropic), reviewed by NDB.
  *
  * Single thread only: no OpenMP, no std::thread, no hand-written SIMD.
+ *
+ * TODO summary (Stage 1):
+ *   Week 2 Day 8   NDB  print H in a line the notebook can parse (for the synthetic test)
+ *   Week 2 Day 9   NDB  write the keypoint debug images
+ *   Week 2 Day 10  LCK  write the match debug image (tell NDB: shared file)
+ *   Week 2 Day 11  NDB  integration: run the full V0 on small images, all sites
+ *   Week 2 Day 12  NDB  check no OpenMP, no threads, no SIMD in every src/ file
  */
 #include <chrono>
 #include <cstdio>
@@ -86,12 +93,18 @@ void run_v0(const ImageRGB& A, const ImageRGB& B, ImageRGB& out,
                "inliers=%d%s\n",
                kpA.size(), kpB.size(), keptA.size(), keptB.size(), matches.size(), inliers,
                found ? "" : " (no homography found, using identity)");
+        // TODO(NDB, Week 2 Day 8): also print "H,h0,h1,...,h8" (one line, %.10g) so
+        //   tools/homography_error.py can read the estimated H from the program output.
     }
     if (opt.debug_dir) {
         std::string dir = opt.debug_dir;
         if (make_dir(dir)) {
             write_debug_images(dir, "A", grayA, blurA);
             write_debug_images(dir, "B", grayB, blurB);
+            // TODO(NDB, Week 2 Day 9): draw_keypoints(A, kpA, img) -> keypoints_A.png,
+            //   same for B (debug_draw.h).
+            // TODO(LCK, Week 2 Day 10): draw_matches(A, keptA, B, keptB, matches, img)
+            //   -> matches.png.
             printf("Debug images written to %s/\n", dir.c_str());
         }
     }
