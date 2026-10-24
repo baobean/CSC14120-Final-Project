@@ -1,0 +1,11 @@
+# build output
+stitch
+*.o
+
+# run output
+debug/
+out/
+*.csv
+
+# dataset lives on the shared Drive, not in Git
+dataset/
