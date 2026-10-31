@@ -1,14 +1,10 @@
 /*
  * v0_detect.cpp - V0 stage 2: Sobel gradients + Harris corners + NMS + top K.
  * Authors: NDB
- * External sources: none
+ * External sources: Harris corner response from C. Harris and M. Stephens,
+ *                   "A Combined Corner and Edge Detector", Alvey Vision Conference, 1988.
+ *                   Implemented from the formula, no code copied.
  * AI assistance: drafted with Claude Code (Anthropic), reviewed by NDB.
- *
- * TODO summary (Stage 1):
- *   Week 1 Day 7   NDB  Sobel Ix, Iy                                   (done)
- *   Week 2 Day 8   NDB  Harris score R for each pixel
- *   Week 2 Day 9   NDB  NMS 3x3, sort by score, keep top K; keypoint debug image (debug_draw.cpp)
- *   Week 2 Day 10  NDB  check keypoint count and spread on all sites
  */
 #include "v0.h"
 
@@ -40,15 +36,63 @@ void v0_sobel(const ImageF& in, ImageF& Ix, ImageF& Iy) {
     }
 }
 
-void v0_detect(const ImageF& blurred, std::vector<Keypoint>& kps) {
-    ImageF Ix, Iy;
-    v0_sobel(blurred, Ix, Iy);
-    kps.clear();
+// Sum of `in` over a HARRIS_WIN x HARRIS_WIN window around each pixel (clamped border).
+// The box is separable like the blur: row sums first, then column sums of those,
+// so 2 * 5 = 10 adds per pixel instead of 25.
+static void box_sum(const std::vector<float>& in, int w, int h, std::vector<float>& out) {
+    const int r = HARRIS_WIN / 2;
+    std::vector<float> tmp((size_t)w * h);
+    for (int y = 0; y < h; y++) {
+        const float* row = &in[(size_t)y * w];
+        for (int x = 0; x < w; x++) {
+            float s = 0.0f;
+            for (int i = -r; i <= r; i++) s += row[clampi(x + i, 0, w - 1)];
+            tmp[(size_t)y * w + x] = s;
+        }
+    }
+    out.resize((size_t)w * h);
+    for (int y = 0; y < h; y++) {
+        for (int x = 0; x < w; x++) {
+            float s = 0.0f;
+            for (int i = -r; i <= r; i++) s += tmp[(size_t)clampi(y + i, 0, h - 1) * w + x];
+            out[(size_t)y * w + x] = s;
+        }
+    }
+}
 
-    // TODO(NDB, Week 2 Day 8): Harris score.
-    //   For each pixel, sum over a HARRIS_WIN x HARRIS_WIN window (clamped border):
-    //     Sxx = sum Ix*Ix, Syy = sum Iy*Iy, Sxy = sum Ix*Iy
-    //   R = (Sxx*Syy - Sxy*Sxy) - HARRIS_K * (Sxx + Syy)^2, stored in an ImageF.
+// M = [Sxx Sxy; Sxy Syy] is the structure tensor summed over the window.
+// Corner: both eigenvalues large -> R > 0. Edge: one large -> R < 0. Flat: R ~ 0.
+// R = det(M) - k * trace(M)^2 gives this without computing the eigenvalues.
+void v0_harris(const ImageF& Ix, const ImageF& Iy, ImageF& R) {
+    const int w = Ix.w, h = Ix.h;
+    const size_t n = (size_t)w * h;
+    std::vector<float> xx(n), yy(n), xy(n);
+    for (size_t i = 0; i < n; i++) {
+        float gx = Ix.data[i], gy = Iy.data[i];
+        xx[i] = gx * gx;
+        yy[i] = gy * gy;
+        xy[i] = gx * gy;
+    }
+    std::vector<float> sxx, syy, sxy;
+    box_sum(xx, w, h, sxx);
+    box_sum(yy, w, h, syy);
+    box_sum(xy, w, h, sxy);
+
+    R.w = w;
+    R.h = h;
+    R.data.resize(n);
+    for (size_t i = 0; i < n; i++) {
+        float det = sxx[i] * syy[i] - sxy[i] * sxy[i];
+        float tr = sxx[i] + syy[i];
+        R.data[i] = det - HARRIS_K * tr * tr;
+    }
+}
+
+void v0_detect(const ImageF& blurred, std::vector<Keypoint>& kps) {
+    ImageF Ix, Iy, R;
+    v0_sobel(blurred, Ix, Iy);
+    v0_harris(Ix, Iy, R);
+    kps.clear();
 
     // TODO(NDB, Week 2 Day 9): NMS 3x3 + top K.
     //   Keep pixel (x, y) only if R > 0 and R is strictly greater than its 8 neighbors

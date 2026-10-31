@@ -19,7 +19,11 @@ void v0_gaussian_blur(const ImageF& in, ImageF& out);
 // ---- Stage 2: keypoint detection (NDB, v0_detect.cpp) ----
 // 3x3 Sobel gradients, clamped border.
 void v0_sobel(const ImageF& in, ImageF& Ix, ImageF& Iy);
-// Harris + NMS 3x3 + top K. Output sorted by score, highest first.
+// Harris response R = det(M) - HARRIS_K * trace(M)^2, where M sums Ix^2, Iy^2, IxIy
+// over a HARRIS_WIN x HARRIS_WIN window (clamped border).
+void v0_harris(const ImageF& Ix, const ImageF& Iy, ImageF& R);
+// Sobel + Harris + NMS 3x3 + top K. Output sorted by score (highest first),
+// equal scores by y, then x.
 void v0_detect(const ImageF& blurred, std::vector<Keypoint>& kps);
 
 // ---- Stage 3: description (LCK, v0_describe.cpp) ----

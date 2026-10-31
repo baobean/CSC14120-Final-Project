@@ -7,7 +7,6 @@
  * Single thread only: no OpenMP, no std::thread, no hand-written SIMD.
  *
  * TODO summary (Stage 1):
- *   Week 2 Day 8   NDB  print H in a line the notebook can parse (for the synthetic test)
  *   Week 2 Day 9   NDB  write the keypoint debug images
  *   Week 2 Day 10  LCK  write the match debug image (tell NDB: shared file)
  *   Week 2 Day 11  NDB  integration: run the full V0 on small images, all sites
@@ -93,8 +92,10 @@ void run_v0(const ImageRGB& A, const ImageRGB& B, ImageRGB& out,
                "inliers=%d%s\n",
                kpA.size(), kpB.size(), keptA.size(), keptB.size(), matches.size(), inliers,
                found ? "" : " (no homography found, using identity)");
-        // TODO(NDB, Week 2 Day 8): also print "H,h0,h1,...,h8" (one line, %.10g) so
-        //   tools/homography_error.py can read the estimated H from the program output.
+        // One line for tools/homography_error.py: the estimated H (B -> A), row-major.
+        printf("H");
+        for (int i = 0; i < 9; i++) printf(",%.10g", H.h[i]);
+        printf("\n");
     }
     if (opt.debug_dir) {
         std::string dir = opt.debug_dir;
