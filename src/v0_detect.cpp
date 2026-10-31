@@ -6,6 +6,8 @@
  *                   Implemented from the formula, no code copied.
  * AI assistance: drafted with Claude Code (Anthropic), reviewed by NDB.
  */
+#include <algorithm>
+
 #include "v0.h"
 
 // Sobel kernels (x grows right, y grows down):
@@ -94,9 +96,36 @@ void v0_detect(const ImageF& blurred, std::vector<Keypoint>& kps) {
     v0_harris(Ix, Iy, R);
     kps.clear();
 
-    // TODO(NDB, Week 2 Day 9): NMS 3x3 + top K.
-    //   Keep pixel (x, y) only if R > 0 and R is strictly greater than its 8 neighbors
-    //   (clamped border). Sort by score, highest first; on equal score sort by y then x,
-    //   so V1+ (atomics give a random order) can sort back to the same list.
-    //   Keep the first MAX_KEYPOINTS.
+    // NMS 3x3: keep (x, y) only if R > 0 and R is strictly greater than all 8 neighbors.
+    // The 1-pixel image border is skipped: with clamping, some neighbors there would be
+    // the pixel itself, so the strict test could never pass anyway (and BRIEF drops
+    // points near the border later).
+    const int w = R.w, h = R.h;
+    const float* r = R.data.data();
+    for (int y = 1; y < h - 1; y++) {
+        for (int x = 1; x < w - 1; x++) {
+            float v = r[(size_t)y * w + x];
+            if (v <= 0.0f) continue;
+            bool is_max = true;
+            for (int dy = -1; dy <= 1 && is_max; dy++)
+                for (int dx = -1; dx <= 1; dx++) {
+                    if (dx == 0 && dy == 0) continue;
+                    if (r[(size_t)(y + dy) * w + (x + dx)] >= v) {
+                        is_max = false;
+                        break;
+                    }
+                }
+            if (is_max) kps.push_back({(float)x, (float)y, v});
+        }
+    }
+
+    // Top K: highest score first. Equal scores are ordered by y, then x, so the order is
+    // fully fixed and V1+ (atomics collect corners in a random order) can sort back to
+    // exactly this list.
+    std::sort(kps.begin(), kps.end(), [](const Keypoint& a, const Keypoint& b) {
+        if (a.score != b.score) return a.score > b.score;
+        if (a.y != b.y) return a.y < b.y;
+        return a.x < b.x;
+    });
+    if ((int)kps.size() > MAX_KEYPOINTS) kps.resize(MAX_KEYPOINTS);
 }

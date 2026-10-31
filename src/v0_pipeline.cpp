@@ -7,7 +7,6 @@
  * Single thread only: no OpenMP, no std::thread, no hand-written SIMD.
  *
  * TODO summary (Stage 1):
- *   Week 2 Day 9   NDB  write the keypoint debug images
  *   Week 2 Day 10  LCK  write the match debug image (tell NDB: shared file)
  *   Week 2 Day 11  NDB  integration: run the full V0 on small images, all sites
  *   Week 2 Day 12  NDB  check no OpenMP, no threads, no SIMD in every src/ file
@@ -16,6 +15,7 @@
 #include <cstdio>
 #include <string>
 
+#include "debug_draw.h"
 #include "image_io.h"
 #include "v0.h"
 #include "versions.h"
@@ -26,15 +26,22 @@ static double ms_since(Clock::time_point t0) {
     return std::chrono::duration<double, std::milli>(Clock::now() - t0).count();
 }
 
-static void write_debug_images(const std::string& dir, const char* tag,
-                               const ImageF& gray, const ImageF& blurred) {
+static void write_debug_images(const std::string& dir, const char* tag, const ImageRGB& img,
+                               const ImageF& gray, const ImageF& blurred,
+                               const std::vector<Keypoint>& kps) {
     save_gray(dir + "/gray_" + tag + ".png", gray, GRAY_CLAMP);
     save_gray(dir + "/blur_" + tag + ".png", blurred, GRAY_CLAMP);
-    ImageF Ix, Iy;
+    ImageF Ix, Iy, R;
     v0_sobel(blurred, Ix, Iy);
+    v0_harris(Ix, Iy, R);
     save_gray(dir + "/Ix_" + tag + ".png", Ix, GRAY_ABS_MAX);
     save_gray(dir + "/Iy_" + tag + ".png", Iy, GRAY_ABS_MAX);
+    save_gray(dir + "/harris_" + tag + ".png", R, GRAY_ABS_MAX);
+    ImageRGB kp_img;
+    draw_keypoints(img, kps, kp_img);
+    save_rgb(dir + "/keypoints_" + tag + ".png", kp_img);
 }
+
 
 void run_v0(const ImageRGB& A, const ImageRGB& B, ImageRGB& out,
             StageTimes& t, const PipelineOptions& opt) {
@@ -100,10 +107,8 @@ void run_v0(const ImageRGB& A, const ImageRGB& B, ImageRGB& out,
     if (opt.debug_dir) {
         std::string dir = opt.debug_dir;
         if (make_dir(dir)) {
-            write_debug_images(dir, "A", grayA, blurA);
-            write_debug_images(dir, "B", grayB, blurB);
-            // TODO(NDB, Week 2 Day 9): draw_keypoints(A, kpA, img) -> keypoints_A.png,
-            //   same for B (debug_draw.h).
+            write_debug_images(dir, "A", A, grayA, blurA, kpA);
+            write_debug_images(dir, "B", B, grayB, blurB, kpB);
             // TODO(LCK, Week 2 Day 10): draw_matches(A, keptA, B, keptB, matches, img)
             //   -> matches.png.
             printf("Debug images written to %s/\n", dir.c_str());

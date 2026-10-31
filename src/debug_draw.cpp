@@ -2,20 +2,32 @@
  * debug_draw.cpp - debug images for keypoints and matches (not timed, debug only).
  * Authors: NDB (draw_keypoints), LCK (draw_matches)
  * External sources: none
- *
- * STUBS created by NDB so the pipeline builds.
+ * AI assistance (draw_keypoints): drafted with Claude Code (Anthropic), reviewed by NDB.
  *
  * TODO summary (Stage 1):
- *   Week 2 Day 9   NDB  draw_keypoints
  *   Week 2 Day 10  LCK  draw_matches
  */
 #include "debug_draw.h"
 
+#include <cmath>
+
 void draw_keypoints(const ImageRGB& img, const std::vector<Keypoint>& kps, ImageRGB& out) {
-    (void)kps;
     out = img;
-    // TODO(NDB, Week 2 Day 9): for each keypoint, paint a 5x5 hollow square in red
-    //   (255, 0, 0) centered on the rounded (x, y); skip pixels outside the image.
+    // 5x5 hollow red square centered on each keypoint; pixels outside the image are skipped.
+    for (const Keypoint& kp : kps) {
+        int cx = (int)std::lround(kp.x), cy = (int)std::lround(kp.y);
+        for (int dy = -2; dy <= 2; dy++) {
+            for (int dx = -2; dx <= 2; dx++) {
+                if (dx != -2 && dx != 2 && dy != -2 && dy != 2) continue;  // inside: hollow
+                int x = cx + dx, y = cy + dy;
+                if (x < 0 || x >= out.w || y < 0 || y >= out.h) continue;
+                uint8_t* p = &out.data[((size_t)y * out.w + x) * 3];
+                p[0] = 255;
+                p[1] = 0;
+                p[2] = 0;
+            }
+        }
+    }
 }
 
 void draw_matches(const ImageRGB& A, const std::vector<Keypoint>& kpA,
