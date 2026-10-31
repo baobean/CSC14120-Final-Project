@@ -11,3 +11,5 @@ out/
 dataset/
 
 local/
+# submission package (make submission)
+Group*_Midterm.zip
