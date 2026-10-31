@@ -9,7 +9,6 @@
  * TODO summary (Stage 1):
  *   Week 2 Day 10  LCK  write the match debug image (tell NDB: shared file)
  *   Week 2 Day 11  NDB  integration: run the full V0 on small images, all sites
- *   Week 2 Day 12  NDB  check no OpenMP, no threads, no SIMD in every src/ file
  */
 #include <chrono>
 #include <cstdio>
