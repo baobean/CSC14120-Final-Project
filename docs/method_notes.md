@@ -7,7 +7,7 @@ TODO summary (Stage 1):
 | Week | Day | Owner | What |
 |---|---|---|---|
 | 1 | 2 | LCK | Notes for stages 3–4 |
-| 1 | 2 | DHDH | Notes for stages 5–6 |
+| 1 | 2 | DHDH | Notes for stages 5–6 (written by NDB, DHDH to review) |
 | 2 | 10 | NDB | Notes for stages 1–2 (done) |
 
 For each stage, write 4 short bullets:
@@ -40,8 +40,14 @@ TODO(LCK, Week 1 Day 2): brute-force Hamming (XOR + bit count), Lowe ratio 0.8, 
 
 ## Stage 5. Homography (DHDH)
 
-TODO(DHDH, Week 1 Day 2): RANSAC with 1000 iterations, 3 px threshold, seed 42, shared sample list; 4-point DLT solved as an 8x8 system (h33 = 1) with Gaussian elimination.
+- **Method:** RANSAC. Each iteration takes 4 matches from a fixed sample list, solves the homography H (B → A) from those 4 point pairs, and counts the matches that H maps within the threshold of their partner (inliers). The H with the most inliers wins (on a tie, the earlier iteration). 4-point solve: with h33 = 1, each pair gives 2 linear equations, so 4 pairs give an 8x8 system, solved by Gaussian elimination with partial pivoting; a pivot below 1e-10 means the 4 points are degenerate (e.g. 3 on a line) and the iteration is skipped.
+- **Parameters:** `RANSAC_ITERS = 1000`, `RANSAC_THRESH = 3.0` px, `RANSAC_SEED = 42`. The sample list (`ransac_samples.cpp`) is `mt19937(42)`, index = `rng() % n`, repeated indexes inside one iteration are drawn again.
+- **Why (quality):** many matches are wrong (repeated texture, ratio test is not perfect). RANSAC ignores them as long as some 4-match samples are all correct; 1000 iterations is plenty for 30–50% inliers. A homography is the exact model for a camera that only rotates. No SVD library is needed.
+- **Why (GPU):** the 1000 hypotheses are independent: 1 thread per iteration solves its 8x8 system and counts its inliers, then a reduction picks the best count (smallest iteration index on a tie). The sample list is made once on the host, so every version tests the same hypotheses and finds the same H.
 
 ## Stage 6. Warping and blending (DHDH)
 
-TODO(DHDH, Week 1 Day 2): canvas from the warped corners of B, inverse warp with H⁻¹ and bilinear sampling, linear blend weight 1 → 0 across the overlap.
+- **Method:** map B's 4 corners with H; the canvas is the bounding box of those and A's rectangle (A is shifted by (tx, ty) if B reaches left of or above A). For every canvas pixel, H⁻¹ (3x3 inverse by adjugate / determinant) gives the point in B, sampled with bilinear interpolation (4 neighbors). Where A and B overlap, out = α·A + (1 − α)·B, with α going from 1 at the left edge of the overlap to 0 at its right edge (A is the left image). Only A → A, only B → B, neither → black. If the canvas would be more than 4x A in width or height (bad H), the output is A alone, with a warning.
+- **Parameters:** none.
+- **Why (quality):** inverse warping leaves no holes (every output pixel gets a value), and bilinear sampling avoids jagged edges. The linear blend hides small exposure differences and small alignment errors at the seam.
+- **Why (GPU):** 1 thread per output pixel, all independent, and the work per pixel is the same. H⁻¹ and the overlap edges are computed once on the host and can go in constant memory.
