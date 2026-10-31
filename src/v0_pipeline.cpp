@@ -42,6 +42,20 @@ static void write_debug_images(const std::string& dir, const char* tag, const Im
     save_rgb(dir + "/keypoints_" + tag + ".png", kp_img);
 }
 
+// Spread check: split the image into an 8x8 grid and count the cells that hold at least
+// one keypoint. 64/64 = keypoints everywhere; a low count = they cluster in a few areas.
+static int grid_cells_used(const std::vector<Keypoint>& kps, int w, int h) {
+    const int G = 8;
+    bool used[G * G] = {false};
+    for (const Keypoint& kp : kps) {
+        int gx = clampi((int)(kp.x * G / w), 0, G - 1);
+        int gy = clampi((int)(kp.y * G / h), 0, G - 1);
+        used[gy * G + gx] = true;
+    }
+    int n = 0;
+    for (int i = 0; i < G * G; i++) n += used[i];
+    return n;
+}
 
 void run_v0(const ImageRGB& A, const ImageRGB& B, ImageRGB& out,
             StageTimes& t, const PipelineOptions& opt) {
@@ -99,6 +113,8 @@ void run_v0(const ImageRGB& A, const ImageRGB& B, ImageRGB& out,
                "inliers=%d%s\n",
                kpA.size(), kpB.size(), keptA.size(), keptB.size(), matches.size(), inliers,
                found ? "" : " (no homography found, using identity)");
+        printf("V0 spread (8x8 grid cells with a keypoint): A=%d/64 B=%d/64\n",
+               grid_cells_used(kpA, A.w, A.h), grid_cells_used(kpB, B.w, B.h));
         // One line for tools/homography_error.py: the estimated H (B -> A), row-major.
         printf("H");
         for (int i = 0; i < 9; i++) printf(",%.10g", H.h[i]);
