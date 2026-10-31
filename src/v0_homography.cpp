@@ -8,7 +8,6 @@
  * AI assistance: drafted with Claude Code (Anthropic), reviewed by NDB.
  *
  * TODO summary (Stage 1):
- *   Week 1 Day 7   DHDH  RANSAC loop (sample list from ransac_samples.cpp)
  *   Week 2 Day 12  DHDH  measure the H error on the synthetic pair for the notebook
  */
 #include <cmath>
@@ -16,6 +15,16 @@
 
 #include "ransac_samples.h"
 #include "v0.h"
+
+// Maps (x, y) with H and divides by w. Returns false if w is ~0 (point at infinity).
+static bool map_point(const Homography& H, double x, double y, double& ox, double& oy) {
+    const double* h = H.h;
+    double w = h[6] * x + h[7] * y + h[8];
+    if (std::fabs(w) < 1e-12) return false;
+    ox = (h[0] * x + h[1] * y + h[2]) / w;
+    oy = (h[3] * x + h[4] * y + h[5]) / w;
+    return true;
+}
 
 // Solves H (h33 = 1) from 4 point pairs (xb, yb) -> (xa, ya).
 // Each pair gives 2 rows of an 8x8 system M * h = b:
@@ -63,21 +72,44 @@ static bool solve_h4(const double xb[4], const double yb[4],
 
 bool v0_homography(const std::vector<Keypoint>& kpA, const std::vector<Keypoint>& kpB,
                    const std::vector<Match>& matches, Homography& H_BtoA, int& inliers) {
-    (void)kpA;
-    (void)kpB;
     H_BtoA = Homography{{1, 0, 0, 0, 1, 0, 0, 0, 1}};
     inliers = 0;
 
-    // TODO(DHDH, Week 1 Day 7): RANSAC.
-    //   std::vector<int> s; make_ransac_samples((int)matches.size(), s);
-    //   If s is empty (fewer than 4 matches), return false.
-    //   For it = 0..RANSAC_ITERS-1:
-    //     take matches s[4*it..4*it+3]; point B = kpB[m.idxB], point A = kpA[m.idxA];
-    //     solve_h4 -> H (skip the iteration if it fails);
-    //     count inliers: for every match, map B with H (divide by w) and count it if the
-    //     distance to A is < RANSAC_THRESH pixels;
-    //     keep H if its count is strictly greater than the best so far (first one wins ties).
-    //   Write the best H and its count; return true if a best H exists.
-    (void)matches;
-    return false;
+    // The same sample list is used by every version, so all of them test the same
+    // hypotheses in the same order.
+    std::vector<int> s;
+    make_ransac_samples((int)matches.size(), s);
+    if (s.empty()) return false;
+
+    const double thresh2 = RANSAC_THRESH * RANSAC_THRESH;
+    int best = -1;
+    for (int it = 0; it < RANSAC_ITERS; it++) {
+        double xb[4], yb[4], xa[4], ya[4];
+        for (int k = 0; k < 4; k++) {
+            const Match& m = matches[s[(size_t)it * 4 + k]];
+            xb[k] = kpB[m.idxB].x;
+            yb[k] = kpB[m.idxB].y;
+            xa[k] = kpA[m.idxA].x;
+            ya[k] = kpA[m.idxA].y;
+        }
+        Homography H;
+        if (!solve_h4(xb, yb, xa, ya, H)) continue;
+
+        // Inlier: B mapped by H lands within RANSAC_THRESH pixels of its match in A.
+        int count = 0;
+        for (const Match& m : matches) {
+            double px, py;
+            if (!map_point(H, kpB[m.idxB].x, kpB[m.idxB].y, px, py)) continue;
+            double dx = px - kpA[m.idxA].x, dy = py - kpA[m.idxA].y;
+            if (dx * dx + dy * dy < thresh2) count++;
+        }
+        // Strictly greater: on a tie the earlier iteration wins (same rule on the GPU).
+        if (count > best) {
+            best = count;
+            H_BtoA = H;
+        }
+    }
+    if (best < 0) return false;
+    inliers = best;
+    return true;
 }
