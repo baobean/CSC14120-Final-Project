@@ -116,3 +116,82 @@ Each member: 2 stages + 1 site + about 2 notebook sections.
 - Use the same methods and parameters as in section 2.
 - Every number in the notebook must come from an output cell.
 - Cite all external code in the source file and in the notebook. Record AI tool use.
+
+## 8. Progress (as of 2026-10-31)
+
+Read this first in the next work session, and update it at the end of every session.
+Status words: **Done**, **Done (untested)**, **Partial**, **Not started**, **Blocked** (by whom/what), **Needs a person** (photos, IDs, Colab runs, submitting: things Claude cannot do).
+"by NDB" = NDB wrote it for the owner (agreed with the team lead); the owner reviews it and owns it from then on.
+"Tested locally" = g++ build on a laptop without a GPU, with a stand-in for stages 3–4 kept outside the repo; not yet run on Colab.
+
+### NDB
+
+| Week/Day | Task | Status | Note |
+|---|---|---|---|
+| W1 D1–3 | Repo, `src/` layout, structs, CLI | Done | commit c58fa9d |
+| W1 D4 | Timing harness | Done | c58fa9d. Site 1 photos: **Needs a person** (not in Git, no Drive link yet) |
+| W1 D5–6 | Grayscale, separable blur | Done | 3caf0a6 |
+| W1 D7 | Sobel | Done | 8fda5c1 |
+| W2 D8 | Harris score; `H,` line in the output | Done, tested locally | `v0_harris` in `v0_detect.cpp`; `v0_pipeline.cpp` prints `H,h0..h8` |
+| W2 D9 | NMS 3x3, sort (score, y, x), top K; keypoint debug image | Done, tested locally | `draw_keypoints`; debug dir also gets `harris_*`, `keypoints_*`. Rectangles test: exactly the 16 corners |
+| W2 D10 | Keypoint count + spread; method notes 1–2 | Partial | `V0 spread` line (8x8 grid) added, notes done. Checking it on all sites is **Blocked** (dataset) |
+| W2 D11 | Integration on small images, all sites | Blocked | LCK stages 3–4 + dataset |
+| W2 D12 | No OpenMP / threads / SIMD | Done | grep clean; `STBI_NO_SIMD` added in `stb_impl.cpp`. Integration bug fixing: Blocked |
+| W2 D13 | Author comments | Done | NDB files + files written for DHDH |
+| W2 D14 | Freeze, tag `v0-midterm`, run medium/large | Blocked | after integration: `git tag v0-midterm && git push origin v0-midterm` |
+| W3 D15 | Notebook setup + dataset cells | Done (untested on Colab) | + helper cell (`run_stitch`, `parse_counts`). Needs `DRIVE_PROJECT` folder check and LCK's `DATASET_DRIVE_ID` |
+| W3 D16 | Notebook 3.2 | Done | |
+| W3 D17 | Notebook 3.1 | Done | names / student IDs: **Needs a person** |
+| W3 D18 | Notebook 3.7 stages 1–2 | Done | |
+| W3 D19 | Review day: Run all on fresh Colab; references check | Partial | references + AI table written (others add theirs); Run all: **Needs a person** |
+| W3 D20 | Zip + submit; replace `XX` | Partial | `make submission GROUP=<n>` ready (zip = notebook + `src/` + `Makefile` + `tools/`). Group number + submit: **Needs a person** |
+
+### LCK (from Git commits e8dbbfc, 952e3b9 and the code)
+
+| Week/Day | Task | Status | Note |
+|---|---|---|---|
+| W1 D2 | Method notes 3–4 | Not started | `docs/method_notes.md` still TODO |
+| W1 D3 | Site 2 photos | Needs a person | not in Git, unknown |
+| W1 D4 | Dataset script (crop 16:9, 3 sizes) | Partial | `script/resize/` = C++ resizer (nearest / bilinear / bicubic, 1 image per call). No 16:9 crop, no loop over pairs/sizes. `tools/prepare_dataset.py` still a skeleton |
+| W1 D5 | Run on 4 pairs, upload to Drive | Not started | no link; notebook needs `DATASET_DRIVE_ID` (cell 3) and the link in 3.6 |
+| W1 D6 | 256 BRIEF pairs, seed 42 | Done (untested) | `brief_pattern.cpp`: mt19937(42), `% 31 − 15`, redraws identical points |
+| W1 D7 | BRIEF descriptor | Done (untested), **does not compile** | see open issues 1–5 |
+| W2 D8 | Skip keypoints near the border | Partial | margin 15 px, plan says 16 |
+| W2 D9–10 | Hamming, best/second, ratio test; `draw_matches` | Not started | `v0_match.cpp`, `debug_draw.cpp` stubs |
+| W2 D12 | Ratio 0.7 vs 0.8 on the challenging pair | Not started | |
+| W2 D13 | Author comments | Not started | |
+| W3 D15–17 | Benchmark CSV, timing table + chart, hot stages, Amdahl | Not started | `tools/run_benchmark.py` skeleton; notebook 3.5.3–3.5.5 TODO |
+| W3 D18 | Notebook 3.7 stages 3–4 | Not started | |
+| — | Check rows 3–4 of the method table (3.3), add references / AI use | Not started | |
+
+### DHDH
+
+| Week/Day | Task | Status | Note |
+|---|---|---|---|
+| W1 D2 | Method notes 5–6 | Done by NDB | DHDH to review |
+| W1 D3 | Site 3 + challenging pair photos | Needs a person | not in Git, unknown |
+| W1 D4 | `tools/make_synthetic_pair.py` | Done by NDB, tested locally | H_true = shift 0.35w + 2° rotation + perspective, same geometry at all sizes |
+| W1 D5 | `tools/homography_error.py` | Done by NDB, tested locally | |
+| W1 D6 | `solve_h4` (8x8 Gaussian elimination) | Done by NDB, tested locally | exact 4 points → reprojection 2.5e-13 px; collinear points rejected |
+| W1 D7 | RANSAC loop, `ransac_samples.cpp` | Done by NDB, tested locally | 300 matches with 40% outliers: all 180 inliers found; same result every run |
+| W2 D8 | Test on the synthetic pair | Done by NDB, tested locally | with the stand-in stages 3–4; must be rerun with LCK's code |
+| W2 D9–11 | Canvas, inverse warp + bilinear, linear blend | Done by NDB, tested locally | identity H gives exactly A; no visible seam |
+| W2 D12 | H error on the synthetic pair | Blocked | LCK stages 3–4; notebook cell 3.5.1 does it for the 3 sizes |
+| W2 D13 | Author comments | Done by NDB | |
+| W2 D14 | One panorama per site + challenging | Blocked | dataset + LCK; notebook cell 3.5.2 does it |
+| W3 D15 | Notebook 3.5.1 | Done by NDB (untested on Colab) | |
+| W3 D16 | Notebook 3.6 + thumbnails, panorama gallery | Done by NDB (untested on Colab) | where/when/who of each site, and why the challenging pair is hard: **Needs a person**; 1–2 sentences per panorama after the run |
+| W3 D17 | Notebook 3.3 method table | Done by NDB | LCK checks the rows for stages 3–4 |
+| W3 D18 | Notebook 3.7 stages 5–6 | Done by NDB | |
+| W3 D19 | README; check Drive link + panoramas | Partial | README written by NDB; CUDA version, GPU, Drive link still TODO |
+
+### Open issues
+
+1. **The build fails** (`make`): `v0_describe.cpp` uses `memset` without `#include <cstring>` (LCK).
+2. `v0_describe.cpp`: `memset(desc[i].bits, 0, BRIEF_BITS)` clears 256 bytes of a 32-byte struct, which overflows the heap. Use `sizeof(desc[i].bits)` (LCK).
+3. `v0_describe.cpp`: pixel index is `(x+dx)*w + y+dy`; it must be `(y+dy)*w + (x+dx)` (LCK).
+4. `v0_describe.cpp`: `kept.erase(remain_size + 1, ...)` keeps one point below the threshold; and the "score < 1% of max" filter itself is not in section 2. Agree on it as a team or remove it (LCK).
+5. `v0_describe.cpp`: border margin 15 px vs 16 px in the plan (LCK).
+6. H error without a final refit: on the synthetic pair (with the stand-in stages 3–4) the mean corner error was 0.8–2.8 px. A least-squares refit of H on all RANSAC inliers would lower it, but it is not in the section 2 method table. Team decision (DHDH owns stage 5).
+7. Placeholders to fill: group number (title, file name), names + student IDs (3.1), site details (3.6), Drive link + `DATASET_DRIVE_ID` (cell 3, 3.6, README), CUDA version + GPU (README), notebook 3.4 (owner not set).
+8. `DRIVE_PROJECT` in the setup cell assumes the shared Drive folder `MyDrive/CSC14120-Final-Project` with `src/`, `tools/`, `Makefile` and `dataset.zip`. Check the real folder name.
