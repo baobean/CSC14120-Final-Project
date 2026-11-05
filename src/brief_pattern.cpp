@@ -8,19 +8,38 @@
  */
 #include "brief_pattern.h"
 
+static bool in(BriefPair* arr, int x, int y){
+    for (int i = 0; i < BRIEF_BITS;i++){
+        if ((arr[i].x1 == x && arr[i].y1 == y) || (arr[i].x2 == x&& arr[i].y2 == y)) return true;
+    }
+    return false;
+}
+
 const BriefPair* brief_pattern() {
     static BriefPair pairs[BRIEF_BITS] = {{0,0,0,0}};
     if (pairs[0].x1 == 0 && pairs[0].x2 == 0 && pairs[0].y1 == 0 && pairs[0].y2 == 0){
         std::mt19937 gen(BRIEF_SEED);
-        for (int i = 0; i < BRIEF_BITS; i++){
-            pairs[i].x1 = (int)(gen() % BRIEF_PATCH) - BRIEF_PATCH / 2;
-            pairs[i].y1 = (int)(gen() % BRIEF_PATCH) - BRIEF_PATCH / 2;
-            pairs[i].x2 = (int)(gen() % BRIEF_PATCH) - BRIEF_PATCH / 2;
-            pairs[i].y2 = (int)(gen() % BRIEF_PATCH) - BRIEF_PATCH / 2;
-            while (pairs[i].x1 == pairs[i].x2 && pairs[i].y1 == pairs[i].y2){
-                pairs[i].x2 = (int)(gen() % BRIEF_PATCH) - BRIEF_PATCH / 2;
-                pairs[i].y2 = (int)(gen() % BRIEF_PATCH) - BRIEF_PATCH / 2;
+        
+        std::uniform_int_distribution uni(-15, 15);
+        for (int i = 0, x, y; i < BRIEF_BITS; i++){
+            x = uni(gen);
+            y = uni(gen);
+            while (in(pairs, x, y)){
+                x = uni(gen);
+                y = uni(gen);
             }
+            pairs[i].x1 = x;
+            pairs[i].y1 = y;
+        }
+        for (int i = 0, x, y; i < BRIEF_BITS; i++){
+            x = uni(gen);
+            y = uni(gen);
+            while (in(pairs, x, y)){
+                x = uni(gen);
+                y = uni(gen);
+            }
+            pairs[i].x2 = x;
+            pairs[i].y2 = y;
         }
     }
     return pairs;

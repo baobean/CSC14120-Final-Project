@@ -7,7 +7,9 @@
  */
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
+#include <cmath>
 #include <random>
 
 #include "common.h"
