@@ -19,6 +19,7 @@
 #include "v0.h"
 #include "versions.h"
 
+
 using Clock = std::chrono::high_resolution_clock;
 
 static double ms_since(Clock::time_point t0) {
@@ -54,6 +55,15 @@ static int grid_cells_used(const std::vector<Keypoint>& kps, int w, int h) {
     int n = 0;
     for (int i = 0; i < G * G; i++) n += used[i];
     return n;
+}
+
+static void write_matches_image(const std::string& dir, 
+    const ImageRGB& A, const ImageRGB& B, const std::vector<Match>& matches,
+    const std::vector<Keypoint>& kptA, const std::vector<Keypoint>& kptB
+){
+    ImageRGB output;
+    draw_matches(A, kptA, B, kptB, matches, output);
+    save_rgb(dir + "/matching_"+".png", output);
 }
 
 void run_v0(const ImageRGB& A, const ImageRGB& B, ImageRGB& out,
@@ -124,6 +134,9 @@ void run_v0(const ImageRGB& A, const ImageRGB& B, ImageRGB& out,
         if (make_dir(dir)) {
             write_debug_images(dir, "A", A, grayA, blurA, kpA);
             write_debug_images(dir, "B", B, grayB, blurB, kpB);
+            // TODO(NDB, Week 2 Day 9): draw_keypoints(A, kpA, img) -> keypoints_A.png,
+            //   same for B (debug_draw.h).
+            write_matches_image(dir, A, B, matches, keptA, keptB);
             // TODO(LCK, Week 2 Day 10): draw_matches(A, keptA, B, keptB, matches, img)
             //   -> matches.png.
             printf("Debug images written to %s/\n", dir.c_str());

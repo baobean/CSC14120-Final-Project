@@ -7,9 +7,14 @@
  * TODO summary (Stage 1):
  *   Week 2 Day 10  LCK  draw_matches
  */
+#include <algorithm>
+#include <cstdlib>
 #include "debug_draw.h"
 
 #include <cmath>
+struct RGB{
+    uint8_t R,G,B;
+};
 
 void draw_keypoints(const ImageRGB& img, const std::vector<Keypoint>& kps, ImageRGB& out) {
     out = img;
@@ -30,16 +35,112 @@ void draw_keypoints(const ImageRGB& img, const std::vector<Keypoint>& kps, Image
     }
 }
 
+// Ref: https://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
+// https://en.wikipedia.org/wiki/HSL_and_HSV#Color_conversion_formulae
+void generateRandomColor(int n, float value, float saturation, std::vector<RGB>& out){
+    // Limit input value
+    value = value > 1? 1 : (value < 0? 0: value);
+    saturation = saturation > 1? 1 : (saturation < 0? 0: saturation);
+
+    out.clear();
+    out.resize(n);
+    const double golden_ratio = 0.618033988749895;
+    srand(42); // temp seed
+    float hue = (rand() % 360) / 360.0f + golden_ratio; 
+    hue = fmod(hue, 1.0);
+    for (int i = 0; i < n; i++){
+        int h1 = hue * 6;
+        hue = fmod(hue + golden_ratio, 1.0);
+        float c = value * saturation,
+            x = c *(1 - abs(h1 % 2 - 1));
+        float r, g, b;
+        switch (h1){
+            case 0: 
+            r = c;
+            g = x;
+            b = 0;
+            break;
+            case 1:
+            r = x;
+            g = c;
+            b = 0;
+            break;
+            case 2:
+            r = 0;
+            g = c;
+            b = x;
+            break;
+            case 3:
+            r = 0;
+            g = x;
+            b = c;
+            break;
+            case 4:
+            r = x;
+            g = 0;
+            b = c;
+            break;
+            case 5:
+            r = c;
+            g = 0;
+            b = x;
+            break;
+            default:;
+        }
+        const float m = value - c;
+        out[i] = {
+            (uint8_t)clampi((r + m) * 255, 0, 255), 
+            (uint8_t)clampi((g + m) * 255, 0, 255), 
+            (uint8_t)clampi((b + m) * 255, 0, 255)
+        };
+    }
+}
+
 void draw_matches(const ImageRGB& A, const std::vector<Keypoint>& kpA,
                   const ImageRGB& B, const std::vector<Keypoint>& kpB,
-                  const std::vector<Match>& matches, ImageRGB& out) {
-    (void)kpA;
-    (void)kpB;
-    (void)matches;
-    (void)B;
-    out = A;
-    // TODO(LCK, Week 2 Day 10): canvas of size (A.w + B.w) x max(A.h, B.h), copy A to the
-    //   left and B to the right. For each match draw a straight line (simple DDA: step
-    //   max(|dx|, |dy|) times) from kpA[idxA] to kpB[idxB] + (A.w, 0), in a color that
-    //   changes with the match index so neighboring lines are easy to tell apart.
+                  const std::vector<Match>& matches, ImageRGB& out) 
+{
+    out.w = A.w + B.w;
+    out.h = std::max(A.h, B.h);
+    out.data.resize(out.w * out.h * 3, 0);
+    // Setting image A, B in output
+    for (int row = 0; row < A.h; row++){
+        for (int col = 0; col < A.w; col++){
+            out.data[(row * out.w + col) * 3] = A.data[(row * A.w + col) * 3];
+            out.data[(row * out.w + col) * 3 + 1] = A.data[(row * A.w + col) * 3 + 1];
+            out.data[(row * out.w + col) * 3 + 2] = A.data[(row * A.w + col) * 3 + 2];
+        }
+    }
+
+    for (int row = 0; row < B.h; row++){
+        for (int col = 0; col < B.w; col++){
+            out.data[(row * out.w + A.w + col) * 3] = B.data[(row * B.w + col) * 3];
+            out.data[(row * out.w + A.w + col) * 3 + 1] = B.data[(row * B.w + col) * 3 + 1];
+            out.data[(row * out.w + A.w + col) * 3 + 2] = B.data[(row * B.w + col) * 3 + 2];
+        }
+    }
+    
+    // Drawing lines
+    Keypoint a,b; // Treated as regular points
+    float dx, dy, y, x;
+    std::vector<RGB> colors;
+    generateRandomColor(matches.size(), 0.9, 0.7, colors);
+    for (int v = 0; v < matches.size(); v++){
+        a = kpA[matches[v].idxA];
+        b = kpB[matches[v].idxB];
+        //printf("%d: %f, %f, %d\n", v, b.x, b.y, matches[v].idxB);
+        dx = (b.x + A.w) - a.x; // A.w is added as we will have two image side by side
+        dy = b.y - a.y;
+        y = a.y;
+        x = a.x;
+        int steps = std::max(fabs(dx), fabs(dy));
+        for (int i = 0; i < steps; i++){
+            int index = (((int)y) * out.w + (int)(x)) * 3;
+            out.data[index] = colors[v].R;
+            out.data[index + 1] = colors[v].G;
+            out.data[index + 2] = colors[v].B;
+            y = y + dy/steps;
+            x = x + dx/steps;
+        }
+    }
 }

@@ -8,6 +8,7 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
+#include <filesystem>
 
 #include "image_io.h"
 
@@ -188,52 +189,113 @@ void resize_bicubic(const ImageRGB& in, ImageRGB& out, int newW, int newH){
     }
 }
 
-// First arg is picture
-// Second is width
-// Third is height
-// Fourth is type: near, bilinear, bicubic
-// Fifth is output file name
+void crop16_9(const ImageRGB& image, ImageRGB& output){
+    output.data.clear();
+    float ratio = (image.w * 1.0) / image.h;
+    int newHeight = image.w * 9.0/16, newWidth = image.h * 16/9.0;
+    std::cout << image.w << ' ' << image.h << ' ' << newWidth << ' ' << newHeight;
+    if (ratio > 16/9.0){
+        output.h = image.h;
+        output.w = newWidth;
+        output.data.resize(output.w * output.h * 3);
+        const int offset = image.w / 2 - newWidth / 2;
+        for (int i = 0; i < image.h; i++){
+            for (int j = 0; j < newWidth; j++){
+                for (int c = 0; c < 3; c++){
+                    output.data[(i * newWidth + j) * 3 + c] = image.data[(i * image.w + j) * 3 + offset + c];
+                }
+            }
+        }
+    } else{
+        output.h = newHeight;
+        output.w = image.w;
+        output.data.resize(output.w * output.h * 3);
+        const int offset = image.h / 2 - newHeight / 2;
+        for (int i = 0; i < newHeight; i++){
+            for(int j = 0; j < image.w; j++){
+                for (int c = 0; c < 3; c++){
+                    output.data[(i * image.w + j) * 3 + c] = image.data[((i + offset) * (image.w) + j) * 3 + c];
+                }
+            }
+        }
+    }
+}
+
+
+// First type for resize
+// Type allow are: near, bilinear, bicubic
+
 int main(int argc, const char* argv[]){
     // Checking number of input
-    if (argc != 6) {
+    if (argc != 2) {
         std::cout << "Invalid number of args";
-        std::cout << "Usage: "<< argv[0] << " <input-file> <new-width> <new-height> <type> <output-file-name" << std::endl;
+        std::cout << "Usage: "<< argv[0] << " <type> " << std::endl;
         std::cout << "<type> is one of the following values: near, bilinear, bicubic" << std::endl;
         return 1;
     }
 
-    // Loading image
-    ImageRGB input;
-    if (!load_rgb(argv[1],input)) return 1;
+    ImageRGB input, output;
+    namespace fs = std::filesystem;
+    std::error_code ec;
+    fs::path dataset("dataset");
+    fs::path dataset_small = dataset / "small";
+    fs::path dataset_medium = dataset / "medium";
+    fs::path dataset_large= dataset / "large";
+    fs::create_directories(dataset);
+    fs::create_directories(dataset_small);
+    fs::create_directories(dataset_medium);
+    fs::create_directories(dataset_large);
 
-    // Checking for integer
-    int w = atoi(argv[2]), h = atoi(argv[3]);
-    if (w == 0 || h == 0) {
-        std::cout << "Given size is not valid";
-        return 1;
+    void (*resize)(const ImageRGB& in, ImageRGB& out, int newW, int newH);
+    
+    if (strcmp(argv[1], "near") == 0){
+        resize = resize_nearest;
     }
-
-    // Computing the output
-    ImageRGB output;
-    if (strcmp(argv[4], "near") == 0){
-        resize_nearest(input, output, w, h);
+    else if (strcmp(argv[1], "bilinear") == 0){
+        resize = resize_bilinear;
     }
-    else if (strcmp(argv[4], "bilinear") == 0){
-        resize_bilinear(input, output, w, h);
-    }
-    else if (strcmp(argv[4], "bicubic") == 0){
-        resize_bicubic(input, output, w, h);
+    else if (strcmp(argv[1], "bicubic") == 0){
+        resize = resize_bicubic;
     }
     else {
         std::cout << "Unknown type" << std::endl;
     }
 
-    // Saving the image
-    if(!save_rgb(argv[5], output)){
-        std::cout << "Fail to save file" << std::endl;
-        return 1;
-    };
-
-    std::cout << "Input:" << input.w << "," << input.h << " Output:" << output.w << ',' << output.h;
+    for(auto& p: fs::recursive_directory_iterator("raw")){
+        fs::path file_path = p.path();
+        file_path = file_path.make_preferred();
+        if (fs::is_regular_file(file_path, ec)){
+            std::string file_name = file_path.string();
+            load_rgb(file_name.c_str(), input);
+            crop16_9(input, output);
+            input.w = output.w;
+            input.h = output.h;
+            input.data = output.data;
+            resize(input, output, 1280, 720);
+            // Saving the image
+            std::cout << file_name << std::endl;
+            fs::path file_output = file_name.substr(4);
+            fs::path parent = file_output.parent_path();
+            fs::create_directories(dataset_small / parent ,ec);
+            fs::create_directories(dataset_medium / parent, ec);
+            fs::create_directories(dataset_large / parent, ec);
+            if(!save_rgb( (dataset_small / file_output).string(), output)){
+                std::cout << "Fail to save file" << std::endl;
+            }
+            resize(input, output, 1920, 1080);
+            if(!save_rgb((dataset_medium / file_output).string(), output)){
+                std::cout << "Fail to save file" << std::endl;
+            }
+            resize(input, output, 3840, 2160);
+            if(!save_rgb((dataset_large / file_output).string(), output)){
+                std::cout << "Fail to save file" << std::endl;
+            }
+        }
+        if (ec){
+            std::cout << "error whill opening file" << file_path << std::endl;
+        }
+    }
+   
+    // std::cout << "Input:" << input.w << "," << input.h << " Output:" << output.w << ',' << output.h;
     return 0;
 }
