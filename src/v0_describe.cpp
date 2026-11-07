@@ -51,8 +51,9 @@ void v0_describe(const ImageF& blurred, const std::vector<Keypoint>& kps,
         for (int bit = 0; bit < BRIEF_BITS; bit++){ 
             int aIndex =  (y + pairs[bit].y1) * blurred.w + x + pairs[bit].x1, 
             bIndex =  (y + pairs[bit].y2) * blurred.w + x + pairs[bit].x2;
-            if (blurred.data[aIndex] > blurred.data[bIndex])
-            desc[i].bits[bit / 32] = (1 << (bit%32)) | desc[i].bits[bit / 32];
+            if (blurred.data[aIndex] > blurred.data[bIndex]){
+                desc[i].bits[bit / 32] = (1ll << (bit%32)) | desc[i].bits[bit / 32];
+            }
         }
     }
     

@@ -19,8 +19,9 @@
 static int count_bit(const Descriptor& v){
     int total = 0;
     for (int i = 0; i < BRIEF_BITS;i++){
-        if (v.bits[i/32] & (1 << (i % 32)) != 0)
+        if ((v.bits[i/32] & (1ll << (i % 32))) != 0){
             total += 1;
+        }
     }
     return total;
 }
@@ -39,12 +40,12 @@ void v0_match(const std::vector<Descriptor>& descA, const std::vector<Descriptor
         matches.clear();
         return;
     }
-    
+
     struct cmp_result{
         int r = 257, index = -1;
     };
     std::vector<std::pair<cmp_result,cmp_result>> results(descA.size());
-    
+
     cmp_result ref1; // A copied refference to allow better access
     for (int i = 0; i < descA.size(); i++){
         for (int j = 0; j < descB.size(); j++){
@@ -58,12 +59,12 @@ void v0_match(const std::vector<Descriptor>& descA, const std::vector<Descriptor
                 results[i].second = {dis, j};
             }
         }
+        
     }
 
     for (int i = 0; i < descA.size(); i++){
         if (results[i].first.index != -1 && results[i].first.r < RATIO_TEST * results[i].second.r)
             matches.push_back({i, results[i].first.index, results[i].first.r});
-        //printf("Results: %d, %d, %d", i, results[i].first.r, results[i].second.r);
     }
 
     // TODO(LCK, Week 2 Day 9): Hamming distance and the two nearest neighbors.
