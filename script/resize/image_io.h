@@ -10,7 +10,7 @@
 
 #include <string>
 #include <vector>
-
+#include <cstdint>
 // 8-bit RGB image, interleaved (R,G,B,R,G,B,...), row-major.
 // Pixel (x, y) channel c is data[(y * w + x) * 3 + c].
 struct ImageRGB {

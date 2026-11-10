@@ -63,7 +63,7 @@ static void write_matches_image(const std::string& dir,
 ){
     ImageRGB output;
     draw_matches(A, kptA, B, kptB, matches, output);
-    save_rgb(dir + "/matching_"+".png", output);
+    save_rgb(dir + "/matches.png", output);
 }
 
 void run_v0(const ImageRGB& A, const ImageRGB& B, ImageRGB& out,

@@ -5,10 +5,13 @@
  * AI assistance: bug fixing on some wrong assumption with ChatGPT
  * 
  */
-#include <vector>
-#include <iostream>
 #include <algorithm>
+#include <cstdint>
+#include <cstring>
+#include <cmath>
 #include <filesystem>
+#include <iostream>
+#include <vector>
 
 #include "image_io.h"
 
@@ -193,7 +196,6 @@ void crop16_9(const ImageRGB& image, ImageRGB& output){
     output.data.clear();
     float ratio = (image.w * 1.0) / image.h;
     int newHeight = image.w * 9.0/16, newWidth = image.h * 16/9.0;
-    std::cout << image.w << ' ' << image.h << ' ' << newWidth << ' ' << newHeight;
     if (ratio > 16/9.0){
         output.h = image.h;
         output.w = newWidth;
@@ -202,7 +204,7 @@ void crop16_9(const ImageRGB& image, ImageRGB& output){
         for (int i = 0; i < image.h; i++){
             for (int j = 0; j < newWidth; j++){
                 for (int c = 0; c < 3; c++){
-                    output.data[(i * newWidth + j) * 3 + c] = image.data[(i * image.w + j) * 3 + offset + c];
+                    output.data[(i * newWidth + j) * 3 + c] = image.data[(i * image.w + j + offset) * 3 + c];
                 }
             }
         }
@@ -220,6 +222,7 @@ void crop16_9(const ImageRGB& image, ImageRGB& output){
         }
     }
 }
+
 
 
 // First type for resize
@@ -265,29 +268,34 @@ int main(int argc, const char* argv[]){
         fs::path file_path = p.path();
         file_path = file_path.make_preferred();
         if (fs::is_regular_file(file_path, ec)){
-            std::string file_name = file_path.string();
-            load_rgb(file_name.c_str(), input);
+            // Croping file
+            load_rgb(file_path.string().c_str(), input);
             crop16_9(input, output);
             input.w = output.w;
             input.h = output.h;
             input.data = output.data;
-            resize(input, output, 1280, 720);
-            // Saving the image
-            std::cout << file_name << std::endl;
-            fs::path file_output = file_name.substr(4);
-            fs::path parent = file_output.parent_path();
-            fs::create_directories(dataset_small / parent ,ec);
-            fs::create_directories(dataset_medium / parent, ec);
-            fs::create_directories(dataset_large / parent, ec);
-            if(!save_rgb( (dataset_small / file_output).string(), output)){
+            
+            // Creating file name
+            fs::path file_output = file_path.string().substr(4); // remove "raw/" prefix
+            fs::path parent = file_output.parent_path(); // get the "<pair/>"
+            // The save format is "<pair>_<name>.<ext>"
+            std::string save_file_name = parent.string() + "_"+ file_path.filename().string();
+            
+            // Saving and resizeing the image
+            std::cout << "Resizing " << file_path << " (Height: " << input.h << ", width:" << input.w << ")" << std::endl;
+            
+            resize(input, output, 1280, 720); // Small size
+            if(!save_rgb((dataset_small / save_file_name).string(), output)){
                 std::cout << "Fail to save file" << std::endl;
             }
-            resize(input, output, 1920, 1080);
-            if(!save_rgb((dataset_medium / file_output).string(), output)){
+
+            resize(input, output, 1920, 1080); // Medium size
+            if(!save_rgb((dataset_medium / save_file_name).string(), output)){
                 std::cout << "Fail to save file" << std::endl;
             }
-            resize(input, output, 3840, 2160);
-            if(!save_rgb((dataset_large / file_output).string(), output)){
+
+            resize(input, output, 3840, 2160); // Large size
+            if(!save_rgb((dataset_large / save_file_name).string(), output)){
                 std::cout << "Fail to save file" << std::endl;
             }
         }
