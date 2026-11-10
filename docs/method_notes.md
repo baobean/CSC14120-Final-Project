@@ -7,7 +7,7 @@ TODO summary (Stage 1):
 | Week | Day | Owner | What |
 |---|---|---|---|
 | 1 | 2 | LCK | Notes for stages 3–4 |
-| 1 | 2 | DHDH | Notes for stages 5–6 (written by NDB, DHDH to review) |
+| 1 | 2 | DHDH | Notes for stages 5–6 (written by NDB, done) |
 | 2 | 10 | NDB | Notes for stages 1–2 (done) |
 
 For each stage, write 4 short bullets:
@@ -40,10 +40,10 @@ TODO(LCK, Week 1 Day 2): brute-force Hamming (XOR + bit count), Lowe ratio 0.8, 
 
 ## Stage 5. Homography (DHDH)
 
-- **Method:** RANSAC. Each iteration takes 4 matches from a fixed sample list, solves the homography H (B → A) from those 4 point pairs, and counts the matches that H maps within the threshold of their partner (inliers). The H with the most inliers wins (on a tie, the earlier iteration). 4-point solve: with h33 = 1, each pair gives 2 linear equations, so 4 pairs give an 8x8 system, solved by Gaussian elimination with partial pivoting; a pivot below 1e-10 means the 4 points are degenerate (e.g. 3 on a line) and the iteration is skipped.
+- **Method:** RANSAC. Each iteration takes 4 matches from a fixed sample list, solves the homography H (B → A) from those 4 point pairs, and counts the matches that H maps within the threshold of their partner (inliers). The H with the most inliers wins (on a tie, the earlier iteration). 4-point solve: with h33 = 1, each pair gives 2 linear equations, so 4 pairs give an 8x8 system, solved by Gaussian elimination with partial pivoting; a pivot below 1e-10 means the 4 points are degenerate (e.g. 3 on a line) and the iteration is skipped. **Refit:** the winning H fits its own 4 points exactly, so it carries their pixel noise. V0 then fits H again to all of its inliers by least squares: every inlier gives the same 2 equations, and the normal equations (AᵀA) h = Aᵀb are again an 8x8 system, solved the same way. The points are first normalized (centroid at 0, mean distance √2; Hartley 1997) so the system stays well conditioned at 3840x2160. The inlier count is then taken for the final H.
 - **Parameters:** `RANSAC_ITERS = 1000`, `RANSAC_THRESH = 3.0` px, `RANSAC_SEED = 42`. The sample list (`ransac_samples.cpp`) is `mt19937(42)`, index = `rng() % n`, repeated indexes inside one iteration are drawn again.
-- **Why (quality):** many matches are wrong (repeated texture, ratio test is not perfect). RANSAC ignores them as long as some 4-match samples are all correct; 1000 iterations is plenty for 30–50% inliers. A homography is the exact model for a camera that only rotates. No SVD library is needed.
-- **Why (GPU):** the 1000 hypotheses are independent: 1 thread per iteration solves its 8x8 system and counts its inliers, then a reduction picks the best count (smallest iteration index on a tie). The sample list is made once on the host, so every version tests the same hypotheses and finds the same H.
+- **Why (quality):** many matches are wrong (repeated texture, ratio test is not perfect). RANSAC ignores them as long as some 4-match samples are all correct; 1000 iterations is plenty for 30–50% inliers. A homography is the exact model for a camera that only rotates. No SVD library is needed. The refit averages the noise of hundreds of points instead of 4: on the synthetic pair the mean corner error goes from 1–3 px to about 0.1 px.
+- **Why (GPU):** the 1000 hypotheses are independent: 1 thread per iteration solves its 8x8 system and counts its inliers, then a reduction picks the best count (smallest iteration index on a tie). The refit is one small solve, done once on the host. The sample list is made once on the host, so every version tests the same hypotheses and finds the same H.
 
 ## Stage 6. Warping and blending (DHDH)
 

@@ -38,7 +38,8 @@ void v0_match(const std::vector<Descriptor>& descA, const std::vector<Descriptor
               std::vector<Match>& matches);
 
 // ---- Stage 5: homography (DHDH, v0_homography.cpp) ----
-// RANSAC + 4-point DLT. Returns false if no valid H was found.
+// RANSAC + 4-point DLT, then a least-squares refit on all inliers.
+// Returns false if no valid H was found. `inliers` is counted for the final H.
 bool v0_homography(const std::vector<Keypoint>& kpA, const std::vector<Keypoint>& kpB,
                    const std::vector<Match>& matches, Homography& H_BtoA, int& inliers);
 
