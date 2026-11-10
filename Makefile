@@ -4,6 +4,7 @@
 # make                          build ./stitch
 # make clean                    remove it
 # make submission GROUP=<n>     zip the notebook + src/ (+ Makefile, tools/) as Group<n>_Midterm.zip
+# make test                     unit tests of stages 4-6 with g++ (no GPU needed)
 #
 # -O2 applies to host code too. No -march=native / -fopenmp, so V0 stays a fair
 # single-thread baseline.
@@ -22,6 +23,20 @@ stitch: $(SRCS) $(HDRS)
 
 clean:
 	rm -f stitch
+	rm -rf build
+
+# Unit tests (tests/*.cpp): plain C++, built with the host compiler, so they also run
+# on a laptop without CUDA.
+CXX       ?= g++
+TESTFLAGS ?= -O2 -std=c++17 -Isrc
+
+test:
+	mkdir -p build
+	$(CXX) $(TESTFLAGS) -o build/test_match tests/test_match.cpp src/v0_match.cpp
+	$(CXX) $(TESTFLAGS) -o build/test_homography tests/test_homography.cpp \
+		src/v0_homography.cpp src/ransac_samples.cpp src/v0_warp.cpp
+	./build/test_match
+	./build/test_homography
 
 # Midterm package (stage1_midterm_plan.md section 1): the notebook, saved with all
 # outputs, renamed to Group<n>_Midterm.ipynb, plus src/. Makefile and tools/ go in too:
@@ -38,4 +53,4 @@ submission:
 	rm -rf .submission
 	@echo "Wrote Group$(GROUP)_Midterm.zip"
 
-.PHONY: clean submission
+.PHONY: clean submission test
