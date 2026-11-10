@@ -5,9 +5,6 @@
  *                   "Computer Vision: Algorithms and Applications", 2nd ed., ch. 3.6 and 8.
  *                   Implemented from the formulas, no code copied.
  * AI assistance: drafted with Claude Code (Anthropic), reviewed by NDB.
- *
- * TODO summary (Stage 1):
- *   Week 2 Day 14  DHDH  one panorama per site + the challenging pair (notebook)
  */
 #include <algorithm>
 #include <cmath>

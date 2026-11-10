@@ -5,10 +5,7 @@
  * AI assistance: drafted with Claude Code (Anthropic), reviewed by NDB.
  *
  * Single thread only: no OpenMP, no std::thread, no hand-written SIMD.
- *
- * TODO summary (Stage 1):
- *   Week 2 Day 10  LCK  write the match debug image (tell NDB: shared file)
- *   Week 2 Day 11  NDB  integration: run the full V0 on small images, all sites
+ * The match debug image (write_matches_image) is by LCK.
  */
 #include <chrono>
 #include <cstdio>
@@ -18,7 +15,6 @@
 #include "image_io.h"
 #include "v0.h"
 #include "versions.h"
-
 
 using Clock = std::chrono::high_resolution_clock;
 
@@ -134,11 +130,7 @@ void run_v0(const ImageRGB& A, const ImageRGB& B, ImageRGB& out,
         if (make_dir(dir)) {
             write_debug_images(dir, "A", A, grayA, blurA, kpA);
             write_debug_images(dir, "B", B, grayB, blurB, kpB);
-            // TODO(NDB, Week 2 Day 9): draw_keypoints(A, kpA, img) -> keypoints_A.png,
-            //   same for B (debug_draw.h).
             write_matches_image(dir, A, B, matches, keptA, keptB);
-            // TODO(LCK, Week 2 Day 10): draw_matches(A, keptA, B, keptB, matches, img)
-            //   -> matches.png.
             printf("Debug images written to %s/\n", dir.c_str());
         }
     }
