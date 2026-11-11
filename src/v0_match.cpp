@@ -1,34 +1,49 @@
 /*
  * v0_match.cpp - V0 stage 4: brute-force Hamming matching + Lowe ratio test.
  * Authors: LCK
- * External sources: none
+ * External sources: 
+ *  - Fast bit counting: https://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetTable
+ * AI assistance: NDB's Claude is uses to checks for errors
  *
- * STUB created by NDB so the pipeline builds. LCK replaces the body.
- *
- *   Week 2 Day 12  LCK  try ratio 0.7 vs 0.8 on the challenging pair; keep 0.8 unless bad
- *   Week 2 Day 13  LCK  update the author comment, cite any adapted code
  */
 #include <cstdlib>
 #include <vector>
 #include <utility>
 #include "v0.h"
 
-static int count_bit(const Descriptor& v){
+static const unsigned char BitsSetTable256[256] = 
+{
+#   define B2(n) n,     n+1,     n+1,     n+2
+#   define B4(n) B2(n), B2(n+1), B2(n+1), B2(n+2)
+#   define B6(n) B4(n), B4(n+1), B4(n+1), B4(n+2)
+    B6(0), B6(1), B6(1), B6(2)
+};
+
+static int count_bit(const Descriptor& value){
     int total = 0;
-    for (int i = 0; i < BRIEF_BITS;i++){
-        if ((v.bits[i/32] & (1ll << (i % 32))) != 0){
-            total += 1;
-        }
+    uint32_t v;
+    for (int i = 0; i < BRIEF_BITS / 32;i++){
+        v = value.bits[i];
+        total += BitsSetTable256[v & 0xff] + 
+        BitsSetTable256[(v >> 8) & 0xff] + 
+        BitsSetTable256[(v >> 16) & 0xff] + 
+        BitsSetTable256[v >> 24]; 
     }
     return total;
 }
 
 static int hamming_distance(const Descriptor& A, const Descriptor& B){
-    Descriptor result;
+    int total = 0;
+    uint32_t v;
+    // Fast bit counting from: https://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetTable
     for (int i = 0; i < BRIEF_BITS / 32 ;i++){
-        result.bits[i] = A.bits[i] ^ B.bits[i];
+        v = A.bits[i] ^ B.bits[i];
+        total += BitsSetTable256[v & 0xff] + 
+                BitsSetTable256[(v >> 8) & 0xff] + 
+                BitsSetTable256[(v >> 16) & 0xff] + 
+                BitsSetTable256[v >> 24]; 
     }
-    return count_bit(result);
+    return total;
 }
 
 
@@ -42,21 +57,20 @@ void v0_match(const std::vector<Descriptor>& descA, const std::vector<Descriptor
         int r = 257, index = -1;
     };
     std::vector<std::pair<cmp_result,cmp_result>> results(descA.size());
-
+    matches.reserve(descA.size());
     cmp_result ref1; // A copied refference to allow better access
     for (int i = 0; i < descA.size(); i++){
         for (int j = 0; j < descB.size(); j++){
             int dis = hamming_distance(descA[i], descB[j]);
             ref1 = results[i].first;
             if (dis < ref1.r){
-                results[i].second = results[i].first;
+                results[i].second = ref1;
                 results[i].first = {dis, j};
             }
             else if (dis < results[i].second.r){
                 results[i].second = {dis, j};
             }
         }
-        
     }
 
     for (int i = 0; i < descA.size(); i++){
