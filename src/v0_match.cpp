@@ -20,30 +20,38 @@ static const unsigned char BitsSetTable256[256] =
 #   define B6(n) B4(n), B4(n+1), B4(n+1), B4(n+2)
     B6(0), B6(1), B6(1), B6(2)
 };
+// Keep for reference
+// static int count_bit(const Descriptor& value){
+//     int total = 0;
+//     uint32_t v;
+//     for (int i = 0; i < BRIEF_BITS / 32;i++){
+//         v = value.bits[i];
+//         total += BitsSetTable256[v & 0xff] + 
+//         BitsSetTable256[(v >> 8) & 0xff] + 
+//         BitsSetTable256[(v >> 16) & 0xff] + 
+//         BitsSetTable256[v >> 24]; 
+//     }
+//     return total;
+// }
 
-static int count_bit(const Descriptor& value){
-    int total = 0;
-    uint32_t v;
-    for (int i = 0; i < BRIEF_BITS / 32;i++){
-        v = value.bits[i];
-        total += BitsSetTable256[v & 0xff] + 
-        BitsSetTable256[(v >> 8) & 0xff] + 
-        BitsSetTable256[(v >> 16) & 0xff] + 
-        BitsSetTable256[v >> 24]; 
-    }
-    return total;
+int count_bit(uint32_t v){
+    #ifdef _MSC_VER
+        return BitsSetTable256[v & 0xff] + 
+                BitsSetTable256[(v >> 8) & 0xff] + 
+                BitsSetTable256[(v >> 16) & 0xff] + 
+                BitsSetTable256[v >> 24]; 
+    #else
+        return __builtin_popcountll(v);
+    #endif
 }
 
-static int hamming_distance(const Descriptor& A, const Descriptor& B){
+int hamming_distance(const Descriptor& A, const Descriptor& B){
     int total = 0;
     uint32_t v;
     // Fast bit counting from: https://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetTable
     for (int i = 0; i < BRIEF_BITS / 32 ;i++){
         v = A.bits[i] ^ B.bits[i];
-        total += BitsSetTable256[v & 0xff] + 
-                BitsSetTable256[(v >> 8) & 0xff] + 
-                BitsSetTable256[(v >> 16) & 0xff] + 
-                BitsSetTable256[v >> 24]; 
+        total += count_bit(v);
     }
     return total;
 }
