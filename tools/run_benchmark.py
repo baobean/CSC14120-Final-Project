@@ -45,8 +45,8 @@ def run_one(stitch: Path, a: Path, b: Path, out_img: Path, version: int, runs: i
     CSV_line = get_part(stdout, "CSV")
     if not CSV_line:
       print("CSV line not found")
-    CSV_line = CSV_line.strip("CSV").strip()
-    GPU_line = GPU_line.strip("GPU: ").strip()
+    CSV_line = CSV_line.removeprefix("CSV").strip()
+    GPU_line = GPU_line.removeprefix("GPU: ").strip()
     return (GPU_line, CSV_line.split(","))
 
 
@@ -74,48 +74,49 @@ def main():
     os.makedirs(args.out.parent, exist_ok=True)
     
     # Running on dataset
-    for size in SIZES:
-      folder:Path = args.dataset / size
-      files:list[Path] =  [f for f in folder.iterdir() if f.is_file()]
-      files.sort()
-      # Assuming that there is an even number of file (i.e. there are two picture per set)
-      for i in range(0, len(files), 2):
-        file_stem = files[i].stem[:-2] # Only get all but the last 2 character (i.e the _A and _B) name
-        save_file_full_path = IMG_OUT_PATH / f"{file_stem}_{size}.png"
-        r = run_one(args.stitch, files[i], files[i + 1], save_file_full_path, args.versions, args.runs)
-        results[(file_stem, size)] = r
-        print(f"Done benchmark for set: {file_stem}, of size: {size}")
-      
-    # Saving results
-    CSV_HEADER = ["gpu","version","pair","size","w","h","runs","pre","det","desc","match","homo","warp","e2e_avg","e2e_min"]
-    with open(args.out, BENCH_RESULT_FILE_MODE, newline='') as f:
-      writer = csv.DictWriter(f, fieldnames=CSV_HEADER)
-      writer.writeheader()
-      for key,value in results.items():
-        file_stem, size = key
-        gpu, csv_values = value
-        if len(csv_values) != 13:
-          csv_values = [-1 for _ in range(13)]
+    for version in args.versions:
+      for size in SIZES:
+        folder:Path = args.dataset / size
+        files:list[Path] =  [f for f in folder.iterdir() if f.is_file()]
+        files.sort()
+        # Assuming that there is an even number of file (i.e. there are two picture per set)
+        for i in range(0, len(files), 2):
+          file_stem = files[i].stem[:-2] # Only get all but the last 2 character (i.e the _A and _B) name
+          save_file_full_path = IMG_OUT_PATH / f"{file_stem}_{size}.png"
+          r = run_one(args.stitch, files[i], files[i + 1], save_file_full_path, version, args.runs)
+          results[(file_stem, size)] = r
+          print(f"Done benchmark for set: {file_stem}, of size: {size}")
         
-        writer.writerow({
-          "gpu": gpu, 
-          "version": csv_values[1], # Starting at 1 because the CLI output have an extra , (for some reason)
-          "pair": file_stem,
-          "size": size,
-          "w": csv_values[2],
-          "h": csv_values[3],
-          "runs": csv_values[4],
-          "pre": csv_values[5], 
-          "det": csv_values[6], 
-          "desc": csv_values[7],
-          "match": csv_values[8],
-          "homo": csv_values[9],
-          "warp": csv_values[10],
-          "e2e_avg": csv_values[11],
-          "e2e_min": csv_values[12]
-          })
-    
-    print("Done")
+      # Saving results
+      CSV_HEADER = ["gpu","version","pair","size","w","h","runs","pre","det","desc","match","homo","warp","e2e_avg","e2e_min"]
+      with open(args.out, BENCH_RESULT_FILE_MODE, newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=CSV_HEADER)
+        writer.writeheader()
+        for key,value in results.items():
+          file_stem, size = key
+          gpu, csv_values = value
+          if len(csv_values) != 13:
+            csv_values = [-1 for _ in range(13)]
+          
+          writer.writerow({
+            "gpu": gpu, 
+            "version": csv_values[1], # Starting at 1 because the CLI output have an extra , (for some reason)
+            "pair": file_stem,
+            "size": size,
+            "w": csv_values[2],
+            "h": csv_values[3],
+            "runs": csv_values[4],
+            "pre": csv_values[5], 
+            "det": csv_values[6], 
+            "desc": csv_values[7],
+            "match": csv_values[8],
+            "homo": csv_values[9],
+            "warp": csv_values[10],
+            "e2e_avg": csv_values[11],
+            "e2e_min": csv_values[12]
+            })
+      print(f"Done version: {version}")
+    print("Done all")
 
 if __name__ == "__main__":
     main()
