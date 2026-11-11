@@ -98,13 +98,6 @@ void resize_bilinear(const ImageRGB& in, ImageRGB& out, int newW, int newH){
                     dx, 
                     dy
                 ) + 0.5f;
-
-            // out.data[outIndex * 3] = (1 - dy) * ( (1 - dx) * in.data[p00] + dx * in.data[p01]) + 
-            //                     dy * ((1-dx) * in.data[p10] + dx * in.data[p11]); 
-            // out.data[outIndex * 3 + 1] = (1 - dy) * ((1 - dx) * in.data[p00 + 1] + dx * in.data[p01 + 1]) + 
-            //                     dy * ((1-dx) * in.data[p10 + 1] + dx * in.data[p11 + 1]); 
-            // out.data[outIndex * 3 + 2] = (1 - dy) * ( (1 - dx) * in.data[p00 + 2] + dx * in.data[p01 + 2]) + 
-            //                     dy * ((1-dx) * in.data[p10 + 2] + dx * in.data[p11 + 2]); 
         }
     }
 }
@@ -168,10 +161,10 @@ void resize_bicubic(const ImageRGB& in, ImageRGB& out, int newW, int newH){
                     const int row_index = clampi(positionsRow[il], 0, in.h - 1);
                     line[il] =  img_bicubic(
                             inX - (int)floorf(inX), 
-                            sample(positionsCol[0], row_index, c),// in.data[(clampi(positionsCol[0], 0, in.w - 1) + row_index * in.w) * 3 + c], 
-                            sample(positionsCol[1], row_index, c),// in.data[(clampi(positionsCol[1], 0, in.w - 1) + row_index * in.w) * 3 + c], 
-                            sample(positionsCol[2], row_index, c),// in.data[(clampi(positionsCol[2], 0, in.w - 1) + row_index * in.w) * 3 + c], 
-                            sample(positionsCol[3], row_index, c),// in.data[(clampi(positionsCol[3], 0, in.w - 1) + row_index * in.w) * 3 + c],
+                            sample(positionsCol[0], row_index, c),
+                            sample(positionsCol[1], row_index, c),
+                            sample(positionsCol[2], row_index, c),
+                            sample(positionsCol[3], row_index, c),
                         positionsCol[0] < 0 ? 1 :(positionsCol[3] >= in.w ? 2 : 0));
                 }
 
@@ -225,8 +218,8 @@ void crop16_9(const ImageRGB& image, ImageRGB& output){
 
 
 
-// First type for resize
-// Type allow are: near, bilinear, bicubic
+// First argument is type for resize
+// Types allow are: near, bilinear, bicubic 
 
 int main(int argc, const char* argv[]){
     // Checking number of input
@@ -261,15 +254,17 @@ int main(int argc, const char* argv[]){
         resize = resize_bicubic;
     }
     else {
-        std::cout << "Unknown type" << std::endl;
+        std::cout << "Unknown type given" << std::endl;
     }
-
+    bool ok;
     for(auto& p: fs::recursive_directory_iterator("raw")){
         fs::path file_path = p.path();
         file_path = file_path.make_preferred();
         if (fs::is_regular_file(file_path, ec)){
             // Croping file
-            load_rgb(file_path.string().c_str(), input);
+            ok = load_rgb(file_path.string().c_str(), input);
+            if (!ok) // Fail to load image (the current file is not an image type)
+                continue;
             crop16_9(input, output);
             input.w = output.w;
             input.h = output.h;
@@ -278,8 +273,10 @@ int main(int argc, const char* argv[]){
             // Creating file name
             fs::path file_output = file_path.string().substr(4); // remove "raw/" prefix
             fs::path parent = file_output.parent_path(); // get the "<pair/>"
-            // The save format is "<pair>_<name>.<ext>"
-            std::string save_file_name = parent.string() + "_"+ file_path.filename().string();
+            // The save format is "<pair>_<name>.png"
+            // Png is choosen as in notebook we only read .png
+            // But the current state of the program does work properly with image type supported by std_image
+            std::string save_file_name = parent.string() + "_"+ file_path.stem().string() + ".png";
             
             // Saving and resizeing the image
             std::cout << "Resizing " << file_path << " (Height: " << input.h << ", width:" << input.w << ")" << std::endl;
@@ -303,7 +300,6 @@ int main(int argc, const char* argv[]){
             std::cout << "error whill opening file" << file_path << std::endl;
         }
     }
-   
-    // std::cout << "Input:" << input.w << "," << input.h << " Output:" << output.w << ',' << output.h;
+    std::cout << "Done" << std::endl;
     return 0;
 }
