@@ -32,11 +32,24 @@ For each stage, write 4 short bullets:
 
 ## Stage 3. Description (LCK)
 
-TODO(LCK, Week 1 Day 2): BRIEF 256 bits, 31x31 patch, fixed pattern from seed 42, border skip 16 px. Why no rotation: rotate-only capture, same zoom.
+- **Method:** BRIEF is used as the descriptor for key points with a patch of 31 x 31. The points are generated once on-the-fly (i.e the points are generated on first call and all next call will use the created values) with `mt19937` C++ random engine and `uniform_int_distribution` for a uniform number generation with random seed of `42`.
+- **Parameters:** `BRIEF_BITS = 256` bits long, `BRIEF_PATCH = 31` pixel wide square, `BRIEF_SEED = 42`
+- **Why (quality):**
+  - BRIEF is selected as it used the binary descritor and it improve the SIFT decriptor by randomly select a set of smaller (and fixed) points instead of using all pixel of the patch to create the descriptor (both of which allows faster creation of descriptor). It is also choosen as the input images does not have any rotation.
+  - Random seed is set to allow repeatable runs. Uniform point selection is use as it is simple and does not lose much recognition rate (based on [this article](https://gilscvblog.com/2013/09/19/a-tutorial-on-binary-descriptors-part-2-the-brief-descriptor/))
+- **Possible GPU implementation:** All keypoints can be used to compute independly from each other and each image.
+- **Note:** Due to the patch size, all keypoints which are too close to the border (the difference between the point to closed border is less then 31/ 2 = 15) are removed before BRIEF calculation.
 
 ## Stage 4. Matching (LCK)
 
-TODO(LCK, Week 1 Day 2): brute-force Hamming (XOR + bit count), Lowe ratio 0.8, tie rule (smaller index wins). Why: all-pairs work, like matrix multiplication.
+- **Method:** A basic brute-force method with Hamming distance is used to find the distance between two keypoints of two images. After that, all points that is significant (i.e have a distance ratio between first and second best distance smaller than 0.8 - Lowe's ratio) is consider a match. For distance tie, the smallest index is choosen. Bit counting is based on [this page on bit operation](https://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetTable) if the compiler is MSVC and based on `__builtin_popcountll` for gcc.
+- **Parameter:** `RATIO_TEST = 0.8`
+- **Why (quality):**
+  - For current implementation, a brute-force method is a good enough (for current version and with 2000 keypoints per image max). Brute-force method give correct result as it compare all possible combination of keypoint pairs.
+  - A Lowe's ratio of 0.8 is choosen as 0.7 give quite a bad result on cloud image pairs <!-- May need to change to image set instead of a description and add evident (but how?) -->
+  - Bit counting not based on `__builtin_popcountll` by default as developing computer does not support `__builtin_popcountll` (current compliler is MSVC) and GPU does not have linux support.
+  - Smallest index is choosen to allow the fulter version have consistent results.
+- **Possible GPU implementation** Each of the keypoint in image B can be independly compare to all of image A.
 
 ## Stage 5. Homography (DHDH)
 
