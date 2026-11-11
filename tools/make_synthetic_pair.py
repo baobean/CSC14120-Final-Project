@@ -18,7 +18,7 @@ Output:
   <out_dir>/H_true.txt   9 numbers, row-major, h[8] = 1
 
 Usage:
-  python tools/make_synthetic_pair.py dataset/small/site1_indoor_A.png dataset/synthetic/small
+  python tools/make_synthetic_pair.py dataset/small/site1_A.png dataset/synthetic/small
 """
 import argparse
 from pathlib import Path

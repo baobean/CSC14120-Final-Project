@@ -117,7 +117,7 @@ Each member: 2 stages + 1 site + about 2 notebook sections.
 - Every number in the notebook must come from an output cell.
 - Cite all external code in the source file and in the notebook. Record AI tool use.
 
-## 8. Progress (as of 2026-11-10)
+## 8. Progress (as of 2026-11-11)
 
 Read this first in the next work session, and update it at the end of every session.
 Status words: **Done**, **Done (untested)**, **Partial**, **Not started**, **Blocked** (by whom/what), **Needs a person** (photos, IDs, Colab runs, submitting: things Claude cannot do).
@@ -231,3 +231,4 @@ Critical path: LCK's dataset → integration → freeze → benchmark → notebo
 ### Open issues (continued)
 
 16. Notebook 3.5.1 used `PAIRS[0]` as the synthetic source, which is `challenging` (sorted first) → low texture. Fixed: first site; `PAIRS` now lists the sites first and `challenging` last.
+17. 2026-11-11, first Colab run: only `site1` was found (the other pairs were JPG, see issue 13), and the old site1 (books ~40 cm from a tiled wall) gave a wrong H (70 of 469 inliers, heavy ghosting) because of parallax. Fixed by NDB: sites retaken; all raw photos converted to PNG (Pillow) in `local/dataset_build/raw/`, `script/resize` run there (bicubic), new `dataset.zip` (24 PNG) in the repo root, not in Git. site1 A/B were swapped (B was the left view) and were renamed in `raw/` too. Pair names are now `site1`, `site2`, `site3`, `challenging` (none of the new sites is indoor); README, `tools/make_synthetic_pair.py` and notebook 3.6 updated. Local V0 check (g++ build): all 4 pairs stitch at all 3 sizes; medium inliers site1 400/447, site2 370/549, site3 212/243, challenging 143/386. Colab Run all (2026-11-11, T4, CUDA 13.0) done: 4 pairs, 8 images per size, same counts as the local check, synthetic H error 0.295 / 0.171 / 0.199 px, no errors. Remaining notebook TODOs for NDB: 3.1 names/IDs, 3.5.2 comments, 3.6 table, AI row for DHDH, group number.

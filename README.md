@@ -43,7 +43,7 @@ make submission GROUP=<n>     # Group<n>_Midterm.zip = notebook + src/ + Makefil
 Example:
 
 ```
-./stitch dataset/small/site1_indoor_A.png dataset/small/site1_indoor_B.png out/site1_small.png --version 0 --runs 5 --debug debug/site1
+./stitch dataset/small/site1_A.png dataset/small/site1_B.png out/site1_small.png --version 0 --runs 5 --debug debug/site1
 ```
 
 Tools (Python 3):
@@ -55,7 +55,7 @@ g++ -O2 -std=c++17 -o resize script/resize/*.cpp
 ./resize bicubic              # run in the folder that holds raw/; type: near | bilinear | bicubic
 
 # synthetic pair with a known homography H_true (B -> A)
-python tools/make_synthetic_pair.py dataset/small/site1_indoor_A.png dataset/synthetic/small
+python tools/make_synthetic_pair.py dataset/small/site1_A.png dataset/synthetic/small
 
 # H error: run V0 on the synthetic pair, then compare its H line with H_true
 ./stitch dataset/synthetic/small/synth_A.png dataset/synthetic/small/synth_B.png out/synth_small.png --version 0 --runs 1 > run_small.log
@@ -119,4 +119,4 @@ Output written to <output_image> (WxH)
 TODO(NDB, Week 3 Day 19): the shared Drive link (from LCK, Week 1 Day 5).
 
 Layout: `dataset/<small|medium|large>/<pair>_A.png` and `<pair>_B.png`, with sizes 1280x720, 1920x1080, 3840x2160 and
-`<pair>` = `site1_indoor`, `site2_outdoor`, `site3_<name>`, `challenging`. `dataset/` is not in Git.
+`<pair>` = `site1`, `site2`, `site3`, `challenging`. `dataset/` is not in Git.
