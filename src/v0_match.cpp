@@ -3,6 +3,8 @@
  * Authors: LCK
  * External sources: 
  *  - Fast bit counting: https://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetTable
+ *  - Lowe's radios: https://docs.opencv.org/3.4.20/d5/d6f/tutorial_feature_flann_matcher.html 
+ *                   https://sites.cc.gatech.edu/classes/AY2016/cs4476_fall/results/proj2/html/sshah426/index.html
  * AI assistance: NDB's Claude is uses to checks for errors
  *
  */

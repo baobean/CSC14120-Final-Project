@@ -1,13 +1,12 @@
 /*
  * v0_describe.cpp - V0 stage 3: BRIEF descriptors (256 bits, no rotation).
  * Authors: LCK
- * External sources: https://www.youtube.com/watch?v=KgsHoJYJ4S8 , 
- * 
- * 
- *
- * TODO summary (Stage 1):
- *   
- *   Week 2 Day 13  LCK  update the author comment, cite any adapted code
+ * External sources: 
+ *  - General infos on SIFT: https://www.youtube.com/watch?v=KgsHoJYJ4S8
+ *                           https://docs.opencv.org/4.13.0/da/df5/tutorial_py_sift_intro.html
+ *  - BRIEF descriptor: https://docs.opencv.org/4.13.0/dc/d7d/tutorial_py_brief.html
+ *                      https://gilscvblog.com/2013/08/26/tutorial-on-binary-descriptors-part-1/
+ *                      https://gilscvblog.com/2013/09/19/a-tutorial-on-binary-descriptors-part-2-the-brief-descriptor/
  */
 #include <algorithm>
 #include <cstring>

@@ -1,12 +1,15 @@
 /*
  * debug_draw.cpp - debug images for keypoints and matches (not timed, debug only).
  * Authors: NDB (draw_keypoints), LCK (draw_matches)
- * External sources: none
+ * External sources: 
+ *  - Random color generator: https://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
+ *  - HSV to RGB: https://en.wikipedia.org/wiki/HSL_and_HSV#Color_conversion_formulae
+ *  - DDA (line drawing): https://www.geeksforgeeks.org/computer-graphics/dda-line-generation-algorithm-computer-graphics/
+ * 
  * AI assistance (draw_keypoints): drafted with Claude Code (Anthropic), reviewed by NDB.
  *
- * TODO summary (Stage 1):
- *   Week 2 Day 10  LCK  draw_matches
  */
+
 #include <algorithm>
 #include <cstdlib>
 #include "debug_draw.h"
@@ -35,8 +38,9 @@ void draw_keypoints(const ImageRGB& img, const std::vector<Keypoint>& kps, Image
     }
 }
 
-// Ref: https://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
-// https://en.wikipedia.org/wiki/HSL_and_HSV#Color_conversion_formulae
+// Ref: 
+// - Generate random colors: https://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
+// - HSV to RGB: https://en.wikipedia.org/wiki/HSL_and_HSV#Color_conversion_formulae
 void generateRandomColor(int n, float value, float saturation, std::vector<RGB>& out){
     // Limit input value
     value = value > 1? 1 : (value < 0? 0: value);
@@ -95,7 +99,7 @@ void generateRandomColor(int n, float value, float saturation, std::vector<RGB>&
         };
     }
 }
-
+// Ref: https://www.geeksforgeeks.org/computer-graphics/dda-line-generation-algorithm-computer-graphics/
 void draw_matches(const ImageRGB& A, const std::vector<Keypoint>& kpA,
                   const ImageRGB& B, const std::vector<Keypoint>& kpB,
                   const std::vector<Match>& matches, ImageRGB& out) 
@@ -128,7 +132,6 @@ void draw_matches(const ImageRGB& A, const std::vector<Keypoint>& kpA,
     for (int v = 0; v < matches.size(); v++){
         a = kpA[matches[v].idxA];
         b = kpB[matches[v].idxB];
-        //printf("%d: %f, %f, %d\n", v, b.x, b.y, matches[v].idxB);
         dx = (b.x + A.w) - a.x; // A.w is added as we will have two image side by side
         dy = b.y - a.y;
         y = a.y;
