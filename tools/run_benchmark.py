@@ -3,11 +3,7 @@ run_benchmark.py - run ./stitch on every pair and size, collect the per-stage ti
 Authors: LCK
 External sources: none
 
-SKELETON created by NDB. LCK implements the TODOs.
-
-TODO summary (Stage 1):
-  Week 3 Day 15  LCK  run 3 sizes x 4 pairs, 5 runs each; save one CSV
-  (Stage 2 Week 1 Day 6 extends it to all versions)
+Runs 3 sizes x every pair, `--runs` timed runs each (default 5), and saves one CSV.
 
 ./stitch prints one line per run that starts with "CSV,":
   CSV,version,w,h,runs,pre,det,desc,match,homo,warp,e2e_avg,e2e_min   (times in ms)
@@ -58,6 +54,8 @@ def main():
     ap.add_argument("--versions", type=int, nargs="+", default=[0])
     ap.add_argument("--runs", type=int, default=5)
     args = ap.parse_args()
+    # Absolute path: Path('./stitch') becomes 'stitch', which subprocess would look up in $PATH.
+    args.stitch = args.stitch.resolve()
     results = dict()
     
     # Parameter check that the default may failed

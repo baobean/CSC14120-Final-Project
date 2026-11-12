@@ -11,8 +11,14 @@ out/
 dataset/
 
 local/
+# local dataset files and the resize tool binary (the dataset lives on the shared Drive)
+/dataset.zip
+/raw/
+/resize
+results/
 # submission package (make submission)
 Group*_Midterm.zip
+.submission/
 
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudiocode,c++,c,cuda,python,jupyternotebooks
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudiocode,c++,c,cuda,python,jupyternotebooks

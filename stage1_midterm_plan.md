@@ -117,7 +117,7 @@ Each member: 2 stages + 1 site + about 2 notebook sections.
 - Every number in the notebook must come from an output cell.
 - Cite all external code in the source file and in the notebook. Record AI tool use.
 
-## 8. Progress (as of 2026-11-11)
+## 8. Progress (as of 2026-11-12, deadline)
 
 Read this first in the next work session, and update it at the end of every session.
 Status words: **Done**, **Done (untested)**, **Partial**, **Not started**, **Blocked** (by whom/what), **Needs a person** (photos, IDs, Colab runs, submitting: things Claude cannot do).
@@ -148,11 +148,11 @@ Status words: **Done**, **Done (untested)**, **Partial**, **Not started**, **Blo
 | W3 D19 | Review day: Run all on fresh Colab; references check | Partial | references + AI table written (others add theirs); Run all: **Needs a person** |
 | W3 D20 | Zip + submit; replace `XX` | Partial | `make submission GROUP=<n>` ready (zip = notebook + `src/` + `Makefile` + `tools/`). Group number + submit: **Needs a person** |
 
-### LCK (from branch `dev-lck`, last commit ee03b4a on 2026-11-10; `dev` fast-forwarded to it)
+### LCK (last commit 22294bc on `dev`, 2026-11-11; checked by NDB 2026-11-12)
 
 | Week/Day | Task | Status | Note |
 |---|---|---|---|
-| W1 D2 | Method notes 3–4 | Not started | `docs/method_notes.md` still TODO |
+| W1 D2 | Method notes 3–4 | Done (22294bc) | Stage 4 GPU note says "each keypoint of B", the code loops over A; the MSVC/gcc sentence and the `<!-- -->` comment need cleaning before they go into 3.3 |
 | W1 D3 | Site 2 photos | Needs a person | not in Git, unknown |
 | W1 D4 | Dataset script (crop 16:9, 3 sizes) | Done, tested locally | `script/resize/` (ee03b4a): builds with g++, crop fixed. `raw/<pair>/A.png` → `dataset/<size>/<pair>_A.png`. `tools/prepare_dataset.py` deleted (README and notebook 3.6 updated by NDB). Small issues: open issues 13–14 |
 | W1 D5 | Run on 4 pairs, upload to Drive | Not started | no link; notebook needs `DATASET_DRIVE_ID` (cell 3) and the link in 3.6 |
@@ -160,9 +160,9 @@ Status words: **Done**, **Done (untested)**, **Partial**, **Not started**, **Blo
 | W1 D7 | BRIEF descriptor | Done, tested locally | issues 1–4 fixed; unit test: every bit right, border filter right |
 | W2 D8 | Skip keypoints near the border | Done | margin 15 px (= pattern radius, enough); write 15 in notes 3–4 and 3.3, not 16 |
 | W2 D9–10 | Hamming, best/second, ratio test; `draw_matches` | Done, tested locally | ee03b4a fixes issues 10–11 (`tests/test_match.cpp`: 7/7 pass). Debug file now `matches.png` |
-| W2 D12 | Ratio 0.7 vs 0.8 on the challenging pair | Not started | |
-| W2 D13 | Author comments | Not started | |
-| W3 D15–17 | Benchmark CSV, timing table + chart, hot stages, Amdahl | In progress (2026-11-10) | `tools/run_benchmark.py` skeleton; notebook 3.5.3–3.5.5 TODO |
+| W2 D12 | Ratio 0.7 vs 0.8 on the challenging pair | Done (notes only) | kept 0.8 ("0.7 bad on the cloud pair"); no output cell shows it, so the notebook must not quote it as a result |
+| W2 D13 | Author comments | Done (f5dab0f) | references added in `v0_describe`, `v0_match`, `brief_pattern`, `debug_draw` |
+| W3 D15–17 | Benchmark CSV, timing table + chart, hot stages, Amdahl | Script done, tested locally (2026-11-12) | `tools/run_benchmark.py` writes a correct V0 CSV (12 rows). Notebook 3.5.3–3.5.5 still TODO, needs the Colab run |
 | W3 D18 | Notebook 3.7 stages 3–4 | Not started | |
 | — | Check rows 3–4 of the method table (3.3), add references / AI use | Not started | |
 
@@ -233,3 +233,8 @@ Critical path: LCK's dataset → integration → freeze → benchmark → notebo
 16. Notebook 3.5.1 used `PAIRS[0]` as the synthetic source, which is `challenging` (sorted first) → low texture. Fixed: first site; `PAIRS` now lists the sites first and `challenging` last.
 17. 2026-11-11, first Colab run: only `site1` was found (the other pairs were JPG, see issue 13), and the old site1 (books ~40 cm from a tiled wall) gave a wrong H (70 of 469 inliers, heavy ghosting) because of parallax. Fixed by NDB: sites retaken; all raw photos converted to PNG (Pillow) in `local/dataset_build/raw/`, `script/resize` run there (bicubic), new `dataset.zip` (24 PNG) in the repo root, not in Git. site1 A/B were swapped (B was the left view) and were renamed in `raw/` too. Pair names are now `site1`, `site2`, `site3`, `challenging` (none of the new sites is indoor); README, `tools/make_synthetic_pair.py` and notebook 3.6 updated. Local V0 check (g++ build): all 4 pairs stitch at all 3 sizes; medium inliers site1 400/447, site2 370/549, site3 212/243, challenging 143/386. Colab Run all (2026-11-11, T4, CUDA 13.0) done: 4 pairs, 8 images per size, same counts as the local check, synthetic H error 0.295 / 0.171 / 0.199 px, no errors. Remaining notebook TODOs for NDB: 3.1 names/IDs, 3.5.2 comments, 3.6 table, AI row for DHDH, group number.
 18. 2026-11-11, merged `dev-lck` (15d2a55) into `dev`: `v0_match.cpp` uses a 256-entry table popcount (same distances, counts unchanged); `tools/run_benchmark.py` implemented. Open (LCK): `run_benchmark.py` passes `str(args.versions)` = `"[0]"` to `--version` (works only because `atoi("[0]")` is 0; `--versions 1` would run V0) and does not loop over versions; `GPU_line.strip("GPU: ")` strips characters, not the prefix (a name starting with G/P/U loses letters); a failed run is written as -1 without printing stderr. `count_bit()` in `v0_match.cpp` is now unused.
+19. 2026-11-12, LCK's commits bb80bb2..22294bc (pushed straight to `dev`), checked by NDB: `make test` passes; V0 counts unchanged on all 4 pairs; `run_benchmark.py` runs end to end. Fixed: issue 13 (resizer always writes `.png`), issue 14 part 2 (non-image files skipped), issue 18 (`--version` number, version loop, prefix removal). Still open (LCK): (a) `v0_match.cpp` uses `__builtin_popcountll` on gcc, which without `-mpopcnt` is a bit-trick sequence: match stage ~80 ms vs ~40 ms with the table at medium (same counts), so V0 matching on Colab is 2x slower than it needs to be; use the table on every compiler. `count_bit`/`hamming_distance` lost `static`. (b) `run_benchmark.py`: `results` is keyed by (pair, size) without the version and the CSV is reopened with 'w' inside the version loop, so with several versions only the last one is kept (Stage 2 bug; V0 fine); panorama names have no version; stderr of a failed run is not printed. (c) resizer: an unknown `<type>` still continues with an uninitialized function pointer (needs `return 1`).
+20. 2026-11-12 (deadline day), full check of `dev` vs this plan: code done, `make test` passes, `dev` = `origin/dev`, `dev-lck` has nothing new. `tools/run_benchmark.py --stitch ./stitch` fails (`FileNotFoundError: 'stitch'`): `Path('./stitch')` drops the `./` and `subprocess` searches `$PATH`; the default (absolute path) works. Fix: `args.stitch = args.stitch.resolve()`; the notebook cell passes an absolute path anyway. Issue 19a measured: table popcount 42 ms vs `__builtin_popcountll` 83 ms for matching at medium, same counts. Local V0 benchmark (i3 laptop, 2 runs) works end to end in ~47 s; detection is the hottest stage (42% small → 58% large), matching falls from 29% to 5%. Paste-ready cells and text for everything left are in `local/midterm_finish_kit.md` (not in Git).
+
+### Left on 2026-11-12 (deadline): all by NDB
+Code: K1 popcount fix (19a), K2 benchmark path fix, K3 `.gitignore`. Drive: share `dataset.zip` publicly → `DATASET_DRIVE_ID` + link; re-sync `src/`, `tools/`, `Makefile`. Notebook: 3.5.3–3.5.5 cells (K4–K9), 3.5.2 captions (K10), 3.6 table + bicubic + link (K11), 3.7 stages 3–4 (K12), references/AI rows (K13), names + IDs, group number, remove TODO blocks (K14). Then fresh Colab Run all, README (K15), tag `v0-midterm`, `make submission GROUP=<n>`, submit.
