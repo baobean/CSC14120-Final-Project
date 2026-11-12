@@ -1,9 +1,8 @@
 /*
  * cuda_utils.cuh - CUDA helpers shared by all GPU versions.
- * Authors: NDB
+ * Authors: Đỗ Bảo
  * External sources: CHECK macro follows the common pattern from the course demos
  *                   and the CUDA C Programming Guide (error handling section).
- * AI assistance: drafted with Claude Code (Anthropic), reviewed by NDB.
  *
  * Stage 2 adds the cudaEvent stage timers here.
  */

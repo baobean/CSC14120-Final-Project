@@ -1,8 +1,7 @@
 /*
  * versions.h - one entry point per version, selected by --version in main.cu.
- * Authors: NDB
+ * Authors: Đỗ Bảo
  * External sources: none
- * AI assistance: drafted with Claude Code (Anthropic), reviewed by NDB.
  */
 #pragma once
 

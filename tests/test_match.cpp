@@ -1,9 +1,8 @@
 /*
  * test_match.cpp - unit test for v0_match (stage 4): ties at the best distance,
  * the ratio test, and clearing the output.
- * Authors: NDB (test for LCK's stage)
+ * Authors: Đỗ Bảo
  * External sources: none
- * AI assistance: drafted with Claude Code (Anthropic), reviewed by NDB.
  *
  * Lowe ratio test: keep a match only if best < 0.8 * second_best.
  * If two descriptors of B are both at the best distance, then second_best == best,

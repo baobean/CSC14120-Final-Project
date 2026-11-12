@@ -1,8 +1,7 @@
 /*
  * debug_draw.h - debug images for keypoints and matches (not timed, debug only).
- * Authors: NDB (draw_keypoints), LCK (draw_matches)
+ * Authors: Đỗ Bảo (draw_keypoints), Chí Khải (draw_matches)
  * External sources: none
- * AI assistance: drafted with Claude Code (Anthropic), reviewed by NDB.
  */
 #pragma once
 

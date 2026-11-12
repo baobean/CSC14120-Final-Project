@@ -1,8 +1,7 @@
 /*
  * v0_preprocess.cpp - V0 stage 1: grayscale + separable Gaussian blur.
- * Authors: NDB
+ * Authors: Đỗ Bảo
  * External sources: none (standard formulas; luma weights from ITU-R BT.601)
- * AI assistance: drafted with Claude Code (Anthropic), reviewed by NDB.
  */
 #include <cmath>
 

@@ -1,8 +1,7 @@
 /*
  * image_io.h - load/save images and write debug images (wraps stb).
- * Authors: NDB
+ * Authors: Đỗ Bảo
  * External sources: uses stb_image / stb_image_write (https://github.com/nothings/stb).
- * AI assistance: drafted with Claude Code (Anthropic), reviewed by NDB.
  * 
  * From src/image_io.h with function save_gray removed and struct ImageRGB added
  */

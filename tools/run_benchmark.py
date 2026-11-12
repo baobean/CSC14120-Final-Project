@@ -1,6 +1,6 @@
 """
 run_benchmark.py - run ./stitch on every pair and size, collect the per-stage timing.
-Authors: LCK
+Authors: Chí Khải
 External sources: none
 
 Runs 3 sizes x every pair, `--runs` timed runs each (default 5), and saves one CSV.

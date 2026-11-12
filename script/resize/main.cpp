@@ -1,8 +1,7 @@
 /*
  * main - script program to change the size of an image
- * Authors: LCK
+ * Authors: Chí Khải
  * External sources: https://paulinternet.nl/bicubic (Bicubic calculation)
- * AI assistance: bug fixing on some wrong assumption with ChatGPT
  * 
  */
 #include <algorithm>

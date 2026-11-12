@@ -1,9 +1,9 @@
 /*
  * brief_pattern.h - the 256 fixed BRIEF pixel pairs, shared by V0 and all GPU versions.
- * Authors: LCK
+ * Authors: Chí Khải
  * External sources: none
  *
- * Header created by NDB (proposal from the Week 1 check-in). LCK owns the implementation.
+ * Header created by Đỗ Bảo (proposal from the Week 1 check-in). Chí Khải owns the implementation.
  */
 #pragma once
 

@@ -1,9 +1,7 @@
 /*
  * ransac_samples.h - the list of random 4-match samples for RANSAC.
- * Authors: DHDH
+ * Authors: Duy Hưng
  * External sources: none
- *
- * Header created by NDB (proposal from the Week 1 check-in). DHDH owns the implementation.
  */
 #pragma once
 

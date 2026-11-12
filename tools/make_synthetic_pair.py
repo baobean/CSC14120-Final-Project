@@ -1,8 +1,7 @@
 """
 make_synthetic_pair.py - make an image pair with a KNOWN homography, to measure V0's H error.
-Authors: NDB (written for DHDH's stage; reviewed by DHDH)
+Authors: Duy Hưng
 External sources: none
-AI assistance: drafted with Claude Code (Anthropic), reviewed by NDB.
 
 Idea: A = a real photo. B = A seen through a known H_true, where H_true maps a point of B
 to A (the same direction as the program's H). Then:

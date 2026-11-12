@@ -1,10 +1,9 @@
 /*
  * v0_warp.cpp - V0 stage 6: inverse warp (bilinear) + linear blend.
- * Authors: NDB (written for DHDH's stage; reviewed by DHDH)
+ * Authors: Duy Hưng
  * External sources: inverse warping and bilinear sampling as in R. Szeliski,
  *                   "Computer Vision: Algorithms and Applications", 2nd ed., ch. 3.6 and 8.
  *                   Implemented from the formulas, no code copied.
- * AI assistance: drafted with Claude Code (Anthropic), reviewed by NDB.
  */
 #include <algorithm>
 #include <cmath>

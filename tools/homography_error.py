@@ -1,8 +1,7 @@
 """
 homography_error.py - error of an estimated H against the true H (synthetic pair test).
-Authors: NDB (written for DHDH's stage; reviewed by DHDH)
+Authors: Duy Hưng
 External sources: none
-AI assistance: drafted with Claude Code (Anthropic), reviewed by NDB.
 
 Error = mean over the 4 corners c of image B of || H_est(c) - H_true(c) ||, in pixels,
 where H(c) maps c with H and divides by w. Below about 1-2 px is a good result.

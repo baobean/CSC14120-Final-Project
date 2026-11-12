@@ -1,9 +1,8 @@
 /*
  * test_homography.cpp - unit tests for stages 5-6 (v0_homography, v0_warp_blend)
  * on made-up points, so they run without images and without a GPU.
- * Authors: NDB (tests for DHDH's stages)
+ * Authors: Đỗ Bảo
  * External sources: none
- * AI assistance: drafted with Claude Code (Anthropic), reviewed by NDB.
  *
  * Run: make test
  */

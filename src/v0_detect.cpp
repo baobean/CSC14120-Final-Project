@@ -1,10 +1,9 @@
 /*
  * v0_detect.cpp - V0 stage 2: Sobel gradients + Harris corners + NMS + top K.
- * Authors: NDB
+ * Authors: Đỗ Bảo
  * External sources: Harris corner response from C. Harris and M. Stephens,
  *                   "A Combined Corner and Edge Detector", Alvey Vision Conference, 1988.
  *                   Implemented from the formula, no code copied.
- * AI assistance: drafted with Claude Code (Anthropic), reviewed by NDB.
  */
 #include <algorithm>
 

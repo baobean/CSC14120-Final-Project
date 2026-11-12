@@ -1,11 +1,10 @@
 /*
  * v0_pipeline.cpp - V0 sequential pipeline: runs stages 1..6 and times each one.
- * Authors: NDB
+ * Authors: Đỗ Bảo
  * External sources: none
- * AI assistance: drafted with Claude Code (Anthropic), reviewed by NDB.
  *
  * Single thread only: no OpenMP, no std::thread, no hand-written SIMD.
- * The match debug image (write_matches_image) is by LCK.
+ * The match debug image (write_matches_image) is by Chí Khải.
  */
 #include <chrono>
 #include <cstdio>

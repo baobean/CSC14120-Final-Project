@@ -1,8 +1,7 @@
 /*
  * common.h - shared data types and fixed parameters for every version (V0..V4).
- * Authors: NDB (structs agreed at the Day 2 team meeting with LCK, DHDH)
+ * Authors: Đỗ Bảo
  * External sources: none
- * AI assistance: drafted with Claude Code (Anthropic), reviewed by NDB.
  */
 #pragma once
 

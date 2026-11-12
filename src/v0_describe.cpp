@@ -1,6 +1,6 @@
 /*
  * v0_describe.cpp - V0 stage 3: BRIEF descriptors (256 bits, no rotation).
- * Authors: LCK
+ * Authors: Chí Khải
  * External sources: 
  *  - General infos on SIFT: https://www.youtube.com/watch?v=KgsHoJYJ4S8
  *                           https://docs.opencv.org/4.13.0/da/df5/tutorial_py_sift_intro.html

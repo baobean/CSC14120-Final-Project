@@ -1,14 +1,13 @@
 /*
  * v0_homography.cpp - V0 stage 5: RANSAC + 4-point DLT, then a least-squares refit
  * of H on all inliers.
- * Authors: NDB (written for DHDH's stage; reviewed by DHDH, except the refit added on 2026-11-10)
+ * Authors: Duy Hưng
  * External sources: RANSAC from M. Fischler and R. Bolles, "Random Sample Consensus",
  *                   Comm. ACM 24(6), 1981. 4-point homography and the least-squares
  *                   refit as in R. Szeliski, "Computer Vision: Algorithms and
  *                   Applications", 2nd ed., ch. 8; point normalization from
  *                   R. Hartley, "In Defense of the Eight-Point Algorithm", IEEE PAMI
  *                   19(6), 1997. Implemented from the formulas, no code copied.
- * AI assistance: drafted with Claude Code (Anthropic), reviewed by NDB.
  */
 #include <cmath>
 #include <utility>

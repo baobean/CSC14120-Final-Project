@@ -3,11 +3,14 @@
 #
 # make                          build ./stitch
 # make clean                    remove it
-# make submission GROUP=<n>     zip the notebook + src/ (+ Makefile, tools/) as Group<n>_Midterm.zip
+# make submission GROUP=<n>     zip the notebook + src/ + tools/ as Group<n>_Midterm.zip
 # make test                     unit tests of stages 4-6 with g++ (no GPU needed)
 #
 # -O2 applies to host code too. No -march=native / -fopenmp, so V0 stays a fair
 # single-thread baseline.
+#
+# The notebook does not use this file: its setup cell runs the same command itself
+# (BUILD = 'nvcc -O2 -std=c++17 -o stitch src/*.cu src/*.cpp'). Keep the two in sync.
 
 NVCC      ?= nvcc
 NVCCFLAGS ?= -O2 -std=c++17
@@ -39,17 +42,17 @@ test:
 	./build/test_homography
 
 # Midterm package (stage1_midterm_plan.md section 1): the notebook, saved with all
-# outputs, renamed to Group<n>_Midterm.ipynb, plus src/. Makefile and tools/ go in too:
-# the notebook's setup cell builds with `make` and the result cells call tools/*.py.
+# outputs, renamed to Group<n>_Midterm.ipynb, plus src/. tools/ goes in too: the
+# result cells call tools/*.py. The notebook builds with nvcc itself, so no Makefile.
 submission:
 	@test -n "$(GROUP)" || { echo "Usage: make submission GROUP=<n>"; exit 1; }
 	@test -n "$(NOTEBOOK)" || { echo "No Group*_Midterm.ipynb found"; exit 1; }
 	rm -rf .submission Group$(GROUP)_Midterm.zip
 	mkdir .submission
 	cp "$(NOTEBOOK)" .submission/Group$(GROUP)_Midterm.ipynb
-	cp -r src tools Makefile .submission/
+	cp -r src tools .submission/
 	rm -rf .submission/tools/__pycache__
-	cd .submission && zip -qr ../Group$(GROUP)_Midterm.zip Group$(GROUP)_Midterm.ipynb src tools Makefile
+	cd .submission && zip -qr ../Group$(GROUP)_Midterm.zip Group$(GROUP)_Midterm.ipynb src tools
 	rm -rf .submission
 	@echo "Wrote Group$(GROUP)_Midterm.zip"
 

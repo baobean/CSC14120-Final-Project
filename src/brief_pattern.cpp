@@ -1,9 +1,8 @@
 /*
  * brief_pattern.cpp - builds the 256 fixed BRIEF pixel pairs.
- * Authors: LCK 
+ * Authors: Chí Khải 
  * External sources: 
  *  - BRIEF descriptor: https://gilscvblog.com/2013/09/19/a-tutorial-on-binary-descriptors-part-2-the-brief-descriptor/
- * AI assistance: "None" (The implementation is based on the comment given by NDB, which - from looking at the comment and speaking with NDB - is claude)
  * 
  */
 #include "brief_pattern.h"

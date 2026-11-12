@@ -1,12 +1,11 @@
 /*
  * debug_draw.cpp - debug images for keypoints and matches (not timed, debug only).
- * Authors: NDB (draw_keypoints), LCK (draw_matches)
+ * Authors: Đỗ Bảo (draw_keypoints), Chí Khải (draw_matches)
  * External sources: 
  *  - Random color generator: https://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
  *  - HSV to RGB: https://en.wikipedia.org/wiki/HSL_and_HSV#Color_conversion_formulae
  *  - DDA (line drawing): https://www.geeksforgeeks.org/computer-graphics/dda-line-generation-algorithm-computer-graphics/
  * 
- * AI assistance (draw_keypoints): drafted with Claude Code (Anthropic), reviewed by NDB.
  *
  */
 

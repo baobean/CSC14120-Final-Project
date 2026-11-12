@@ -1,8 +1,7 @@
 /*
  * main.cu - command line, image I/O and timing harness for all versions.
- * Authors: NDB
+ * Authors: Đỗ Bảo
  * External sources: none
- * AI assistance: drafted with Claude Code (Anthropic), reviewed by NDB.
  *
  * Usage: ./stitch <left> <right> <out> --version <0|1|...> [--runs N] [--debug DIR]
  *

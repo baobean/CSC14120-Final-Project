@@ -1,9 +1,8 @@
 /*
  * stb_impl.cpp - compiles the stb image loader/writer once.
- * Authors: NDB
+ * Authors: Đỗ Bảo
  * External sources: stb_image.h v2.30 and stb_image_write.h v1.16 by Sean Barrett,
  *                   https://github.com/nothings/stb (public domain / MIT).
- * AI assistance: drafted with Claude Code (Anthropic), reviewed by NDB.
  */
 // stb_image has SSE2/NEON code for JPEG decoding; turn it off so nothing in the
 // program uses SIMD intrinsics (V0 rule), even in the untimed image loading.

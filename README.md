@@ -19,15 +19,23 @@ Google Colab with a GPU runtime (Runtime → Change runtime type → GPU). `nvcc
 - CUDA version: TODO(NDB, Week 3 Day 19): the `release` line of `nvcc --version`.
 - Python packages for `tools/`: `numpy`, `Pillow` (both preinstalled on Colab); the notebook also uses `pandas`, `matplotlib`.
 
-The notebook `GroupXX_Midterm.ipynb` does the setup in its first cells (copy the code, `make`, print the GPU, get the dataset).
+The notebook `GroupXX_Midterm.ipynb` does the setup in its first cells (copy the code, build it with `nvcc`, print the GPU, get the dataset).
 
 ## Build
 
+The notebook builds with one command (no Makefile needed):
+
 ```
-make                          # builds ./stitch with nvcc (-O2, no OpenMP)
+nvcc -O2 -std=c++17 -o stitch src/*.cu src/*.cpp     # -O2, no OpenMP, no -march=native
+```
+
+In the repository, the Makefile runs the same command and a few helpers:
+
+```
+make                          # same nvcc command as above
 make clean
 make test                     # unit tests of stages 4-6 (g++, no GPU needed)
-make submission GROUP=<n>     # Group<n>_Midterm.zip = notebook + src/ + Makefile + tools/
+make submission GROUP=<n>     # Group<n>_Midterm.zip = notebook + src/ + tools/
 ```
 
 ## Run

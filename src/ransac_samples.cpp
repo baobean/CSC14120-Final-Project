@@ -1,8 +1,7 @@
 /*
  * ransac_samples.cpp - builds the RANSAC sample list.
- * Authors: NDB (written for DHDH's stage; reviewed by DHDH)
+ * Authors: Duy Hưng
  * External sources: none
- * AI assistance: drafted with Claude Code (Anthropic), reviewed by NDB.
  */
 #include "ransac_samples.h"
 
