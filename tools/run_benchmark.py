@@ -71,6 +71,9 @@ def main():
     os.makedirs(IMG_OUT_PATH, exist_ok=True) 
     os.makedirs(args.out.parent, exist_ok=True)
     
+    with open(args.out, BENCH_RESULT_FILE_MODE) as f:
+      pass  # Just to create the file if it does not exist
+    
     # Running on dataset
     for version in args.versions:
       for size in SIZES:
@@ -87,7 +90,7 @@ def main():
         
       # Saving results
       CSV_HEADER = ["gpu","version","pair","size","w","h","runs","pre","det","desc","match","homo","warp","e2e_avg","e2e_min"]
-      with open(args.out, BENCH_RESULT_FILE_MODE, newline='') as f:
+      with open(args.out, 'a', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=CSV_HEADER)
         writer.writeheader()
         for key,value in results.items():
