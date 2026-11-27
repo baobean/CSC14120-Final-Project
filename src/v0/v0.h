@@ -6,7 +6,7 @@
  */
 #pragma once
 
-#include "common.h"
+#include "core/common.cuh"
 
 // ---- Stage 1: preprocessing (Đỗ Bảo, v0_preprocess.cpp) ----
 // gray = 0.299 R + 0.587 G + 0.114 B, values 0..255

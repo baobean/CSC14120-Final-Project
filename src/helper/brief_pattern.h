@@ -12,7 +12,7 @@
 #include <cmath>
 #include <random>
 
-#include "common.h"
+#include "core/common.cuh"
 // One test of the descriptor: compare pixel (x1, y1) with pixel (x2, y2).
 // Offsets are relative to the keypoint, in [-BRIEF_PATCH/2, BRIEF_PATCH/2] = [-15, 15].
 struct BriefPair {

@@ -12,7 +12,7 @@
 #include <cmath>
 #include <utility>
 
-#include "ransac_samples.h"
+#include "helper/ransac_samples.h"
 #include "v0.h"
 
 // Maps (x, y) with H and divides by w. Returns false if w is ~0 (point at infinity).

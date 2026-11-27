@@ -5,8 +5,8 @@
  */
 #pragma once
 
+#include "core/common.cuh"
 #include <string>
-#include "common.h"
 
 // Loads any format stb supports as 8-bit RGB.
 bool load_rgb(const char* path, ImageRGB& img);

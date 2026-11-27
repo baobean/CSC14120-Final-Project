@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "common.h"
+#include "core/common.cuh"
 
 // Copy of img with a small colored square at each keypoint.
 void draw_keypoints(const ImageRGB& img, const std::vector<Keypoint>& kps, ImageRGB& out);

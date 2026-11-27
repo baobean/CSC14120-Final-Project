@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "common.h"
+#include "core/common.cuh"
 
 // Every version has the same signature: stitch B onto A's frame, write the
 // panorama into `out`, and fill the per-stage times of this one run.
@@ -18,6 +18,10 @@ void run_v0(const ImageRGB& A, const ImageRGB& B, ImageRGB& out,
 
 // V1..V4 are added here in Stage 2.
 
+// V1: simple GPU implementation, single thread (v1_pipeline.cpp)
+void run_v1(const ImageRGB& A, const ImageRGB& B, ImageRGB& out,
+            StageTimes& t, const PipelineOptions& opt);
+
 struct VersionEntry {
     int id;
     const char* name;
@@ -26,6 +30,7 @@ struct VersionEntry {
 
 static const VersionEntry VERSIONS[] = {
     {0, "V0 sequential", run_v0},
+    {1, "V1 native GPU", run_v1}
 };
 static const int NUM_VERSIONS = sizeof(VERSIONS) / sizeof(VERSIONS[0]);
 

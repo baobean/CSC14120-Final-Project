@@ -10,8 +10,8 @@
 #include <cstdio>
 #include <filesystem>
 
-#include "stb_image.h"
-#include "stb_image_write.h"
+#include "core/stb_image.h"
+#include "core/stb_image_write.h"
 
 bool load_rgb(const char* path, ImageRGB& img) {
     int w, h, channels;

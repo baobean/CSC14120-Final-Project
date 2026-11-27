@@ -16,10 +16,10 @@
 #include <cstring>
 #include <vector>
 
-#include "common.h"
-#include "cuda_utils.cuh"
-#include "image_io.h"
-#include "versions.h"
+#include "core/common.cuh"
+#include "helper/cuda_utils.cuh"
+#include "helper/image_io.h"
+#include "core/versions.h"
 
 static void usage(const char* prog) {
     fprintf(stderr,

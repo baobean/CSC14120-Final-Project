@@ -10,13 +10,20 @@
 # single-thread baseline.
 #
 # The notebook does not use this file: its setup cell runs the same command itself
-# (BUILD = 'nvcc -O2 -std=c++17 -o stitch src/*.cu src/*.cpp'). Keep the two in sync.
+# (BUILD = 'nvcc -O2 -std=c++17 -o stitch src/*.cu src/*.cpp'). Keep the two in sync. Currently not in sync
 
 NVCC      ?= nvcc
-NVCCFLAGS ?= -O2 -std=c++17
+NVCCFLAGS ?= -O2 -std=c++17 -Isrc
 
-SRCS := $(wildcard src/*.cu) $(wildcard src/*.cpp)
-HDRS := $(wildcard src/*.h) $(wildcard src/*.cuh)
+rwildcard = $(strip \
+				$(foreach d,$(wildcard $(1:=/*)),\
+					$(filter $(subst *,%,$2),$d) \
+					$(call rwildcard,$d,$2)\
+					)\
+			)
+
+SRCS := $(call rwildcard,src,*.cu) $(call rwildcard,src,*.cpp)
+HDRS := $(call rwildcard,src,*.h) $(call rwildcard,src,*.cuh)
 
 # The notebook keeps its name until Day 20 (GroupXX_...), then gets the group number.
 NOTEBOOK ?= $(firstword $(wildcard Group*_Midterm.ipynb))

@@ -6,7 +6,7 @@
 #pragma once
 
 #include <vector>
-#include "common.h"
+#include "core/common.cuh"
 
 // Fills `samples` with RANSAC_ITERS * 4 match indexes (iteration it uses
 // samples[4*it .. 4*it+3]), all in [0, num_matches), 4 different indexes per iteration.

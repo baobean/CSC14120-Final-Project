@@ -19,8 +19,8 @@ constexpr float  HARRIS_K       = 0.04f;
 constexpr int    HARRIS_WIN     = 5;      // window for summing Ix^2, Iy^2, IxIy
 constexpr int    MAX_KEYPOINTS  = 2000;   // top K
 // Stage 3: BRIEF
-constexpr int    BRIEF_BITS     = 256;
-constexpr int    BRIEF_PATCH    = 31;
+constexpr int BRIEF_BITS     = 256;
+constexpr int BRIEF_PATCH    = 31;
 constexpr unsigned BRIEF_SEED   = 42;
 // Stage 4: matching
 constexpr float  RATIO_TEST     = 0.8f;

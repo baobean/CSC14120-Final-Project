@@ -12,7 +12,7 @@
 #include <cstring>
 #include <vector>
 #include "v0.h"
-#include "brief_pattern.h"
+#include "helper/brief_pattern.h"
 
 void v0_describe(const ImageF& blurred, const std::vector<Keypoint>& kps,
                  std::vector<Keypoint>& kept, std::vector<Descriptor>& desc) {

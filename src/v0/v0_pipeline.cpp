@@ -10,10 +10,10 @@
 #include <cstdio>
 #include <string>
 
-#include "debug_draw.h"
-#include "image_io.h"
+#include "helper/debug_draw.h"
+#include "helper/image_io.h"
 #include "v0.h"
-#include "versions.h"
+#include "core/versions.h"
 
 using Clock = std::chrono::high_resolution_clock;
 
