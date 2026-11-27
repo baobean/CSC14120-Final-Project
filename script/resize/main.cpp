@@ -254,6 +254,7 @@ int main(int argc, const char* argv[]){
     }
     else {
         std::cout << "Unknown type given" << std::endl;
+        return 1;
     }
     bool ok;
     for(auto& p: fs::recursive_directory_iterator("raw")){
